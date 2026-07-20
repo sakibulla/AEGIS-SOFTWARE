@@ -3,89 +3,63 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'aegis_stream_urls';
 
-// Initialize with null URLs for all three bots
-const DEFAULT_URLS = {
-  pathfinder: null,
-  guardian: null,
-  warden: null,
-};
-
 /**
- * Custom React hook to manage per-bot video stream URLs
- * Persists URLs to AsyncStorage and restores them on mount
- * 
- * @returns {Object} { urls, setUrl, loading }
- *   - urls: Object with bot IDs as keys and stream URLs as values
- *   - setUrl: Function to update a bot's URL (botId, url)
- *   - loading: Boolean indicating if URLs are being loaded from storage
+ * Custom hook for managing stream URLs for each bot
+ * Persists URLs to AsyncStorage
  */
 export const useStreamUrls = () => {
-  const [urls, setUrls] = useState(DEFAULT_URLS);
+  const [urls, setUrlsState] = useState({});
   const [loading, setLoading] = useState(true);
 
   // Load URLs from AsyncStorage on mount
   useEffect(() => {
     const loadUrls = async () => {
       try {
-        setLoading(true);
-        const storedUrls = await AsyncStorage.getItem(STORAGE_KEY);
-        
-        if (storedUrls) {
-          try {
-            const parsedUrls = JSON.parse(storedUrls);
-            setUrls(parsedUrls);
-          } catch (parseError) {
-            console.warn('Failed to parse stored URLs, using defaults', parseError);
-            setUrls(DEFAULT_URLS);
-          }
-        } else {
-          setUrls(DEFAULT_URLS);
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setUrlsState(JSON.parse(stored));
         }
+        setLoading(false);
       } catch (error) {
-        console.warn('Failed to load URLs from AsyncStorage', error);
-        setUrls(DEFAULT_URLS);
-      } finally {
+        console.error('Error loading stream URLs:', error);
         setLoading(false);
       }
     };
-
     loadUrls();
   }, []);
 
   /**
-   * Update a bot's URL and persist to AsyncStorage
-   * 
-   * @param {string} botId - The bot identifier (pathfinder, guardian, warden)
-   * @param {string|null} url - The stream URL or null to clear
+   * Set URL for a specific bot and persist to AsyncStorage
+   * @param {string} botId - Bot identifier (e.g., 'pathfinder', 'guardian', 'warden')
+   * @param {string} url - Stream URL (e.g., 'http://192.168.1.100:8000/video_feed')
    */
   const setUrl = async (botId, url) => {
     try {
-      const updatedUrls = { ...urls, [botId]: url };
-      setUrls(updatedUrls);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUrls));
+      const updated = { ...urls, [botId]: url };
+      setUrlsState(updated);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (error) {
-      console.error('Failed to save URL to AsyncStorage', error);
-      // Revert the state if save fails
-      setUrls(urls);
+      console.error(`Error setting URL for ${botId}:`, error);
+      throw error;
     }
   };
 
-  return { urls, setUrl, loading };
-};
+  /**
+   * Helper: Convert video_feed URL to detections URL
+   * Converts: http://192.168.1.100:8000/video_feed
+   * To: http://192.168.1.100:8000/detections
+   * @param {string} streamUrl - The stream URL
+   * @returns {string} The detections endpoint URL
+   */
+  const detectionsUrlFor = (streamUrl) => {
+    if (!streamUrl) return null;
+    return streamUrl.replace('/video_feed', '/detections');
+  };
 
-/**
- * Helper function to convert a video feed URL to a detections URL
- * 
- * @param {string} streamUrl - The stream URL ending in "/video_feed"
- * @returns {string} The same URL with "/detections" instead of "/video_feed"
- * 
- * @example
- * detectionsUrlFor("http://192.168.1.45:8000/video_feed")
- * // Returns: "http://192.168.1.45:8000/detections"
- */
-export const detectionsUrlFor = (streamUrl) => {
-  if (!streamUrl) {
-    return null;
-  }
-  return streamUrl.replace('/video_feed', '/detections');
+  return {
+    urls,
+    setUrl,
+    loading,
+    detectionsUrlFor,
+  };
 };
