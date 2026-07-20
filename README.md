@@ -3,7 +3,7 @@
 
 *A low-cost, COTS-based swarm of ground robots that responds to indoor emergencies — mapping the space, checking on people, and detecting hazards — so help doesn't have to wait for a human to arrive first.*
 
-📺 **Demo video:** [Watch on YouTube](https://www.youtube.com/watch?v=Inbc1NvTbIw)
+📺 **Project overview video:** [Watch on YouTube](https://www.youtube.com/watch?v=Inbc1NvTbIw)
 
 ---
 
