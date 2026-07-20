@@ -3,7 +3,7 @@
 
 *A low-cost, COTS-based swarm of ground robots that responds to indoor emergencies — mapping the space, checking on people, and detecting hazards — so help doesn't have to wait for a human to arrive first.*
 
-📺 **Demo video:** _[link coming soon]_
+📺 **Demo video:** [Watch on YouTube](https://www.youtube.com/watch?v=Inbc1NvTbIw)
 
 ---
 
@@ -59,3 +59,6 @@ Supervised by **Dr. Shahnewaz Siddique**, Associate Professor, Department of ECE
 
 ---
 
+## Repository Contents
+
+This repo contains the mobile app used as the live command dashboard for the swarm — showing video feeds, maps, alerts, and manual controls. For technical setup and development details, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md) *(coming soon)*.
