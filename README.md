@@ -61,4 +61,4 @@ Supervised by **Dr. Shahnewaz Siddique**, Associate Professor, Department of ECE
 
 ## Repository Contents
 
-This repo contains the mobile app used as the live command dashboard for the swarm — showing video feeds, maps, alerts, and manual controls. For technical setup and development details, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md) *(coming soon)*.
+This repo contains the mobile app used as the live command dashboard for the swarm — showing video feeds, maps, alerts, and manual controls. For technical setup and development details, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md) 

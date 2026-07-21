@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../constants/theme';
+import { Typography, Spacing, Radius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import {
   BotCard, AlertBanner, IncidentRow, SectionLabel, MeshBadge,
 } from '../components/SwarmUI';
@@ -15,6 +16,9 @@ const { width } = Dimensions.get('window');
 
 export default function DashboardScreen({ navigation }) {
   const [mode, setMode] = useState('autonomous');
+  const { colors, isDarkMode, toggleTheme } = useTheme();
+
+  const styles = getStyles(colors);
 
   const onlineCount = BOTS.filter(b => b.status === 'online').length;
   const alertCount  = BOTS.filter(b => b.status === 'alert').length;
@@ -32,7 +36,7 @@ export default function DashboardScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.bg0} />
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.bg0} />
 
       {/* ── Top Bar ── */}
       <View style={styles.topBar}>
@@ -43,10 +47,15 @@ export default function DashboardScreen({ navigation }) {
             <Text style={styles.topBarSubText}>· {onlineCount}/3 bots active</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.bellBtn} onPress={() => navigation.navigate('Alerts')}>
-          {alertCount > 0 && <View style={styles.bellBadge}><Text style={styles.bellBadgeText}>{alertCount}</Text></View>}
-          <Ionicons name="notifications" size={22} color={Colors.textSecondary} />
-        </TouchableOpacity>
+        <View style={styles.topBarActions}>
+          <TouchableOpacity style={styles.themeBtn} onPress={toggleTheme} activeOpacity={0.7}>
+            <Ionicons name={isDarkMode ? 'moon' : 'sunny'} size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bellBtn} onPress={() => navigation.navigate('Alerts')}>
+            {alertCount > 0 && <View style={styles.bellBadge}><Text style={styles.bellBadgeText}>{alertCount}</Text></View>}
+            <Ionicons name="notifications" size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -64,9 +73,9 @@ export default function DashboardScreen({ navigation }) {
         {/* ── Swarm Stat Cards ── */}
         <View style={styles.section}>
           <View style={styles.statRow}>
-            <StatCard label="Bots online"   value={`${onlineCount}/3`} color={Colors.green} icon="hardware-chip" />
-            <StatCard label="Active alerts" value={alertCount}         color={Colors.amber}  icon="warning" />
-            <StatCard label="Map coverage"  value="78%"               color={Colors.cyan}   icon="map" />
+            <StatCard label="Bots online"   value={`${onlineCount}/3`} color={colors.green} icon="hardware-chip" />
+            <StatCard label="Active alerts" value={alertCount}         color={colors.amber}  icon="warning" />
+            <StatCard label="Map coverage"  value="78%"               color={colors.cyan}   icon="map" />
           </View>
         </View>
 
@@ -93,12 +102,14 @@ export default function DashboardScreen({ navigation }) {
               label="Autonomous"
               active={mode === 'autonomous'}
               onPress={() => setMode('autonomous')}
+              colors={colors}
             />
             <ModeBtn
               icon="game-controller"
               label="Manual RC"
               active={mode === 'manual'}
               onPress={() => { setMode('manual'); navigation.navigate('Control'); }}
+              colors={colors}
             />
           </View>
         </View>
@@ -116,7 +127,7 @@ export default function DashboardScreen({ navigation }) {
         {/* ── SOS ── */}
         <View style={styles.section}>
           <TouchableOpacity style={styles.sosBtn} onPress={handleSOS} activeOpacity={0.8}>
-            <Ionicons name="call" size={18} color={Colors.red} />
+            <Ionicons name="call" size={18} color={colors.red} />
             <Text style={styles.sosBtnText}>Emergency Override — Contact Services</Text>
           </TouchableOpacity>
         </View>
@@ -128,6 +139,9 @@ export default function DashboardScreen({ navigation }) {
 // ─── Stat Card ────────────────────────────────────────────────────
 
 function StatCard({ label, value, color, icon }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
     <View style={styles.statCard}>
       <Ionicons name={icon} size={16} color={color} style={{ marginBottom: 4 }} />
@@ -139,23 +153,25 @@ function StatCard({ label, value, color, icon }) {
 
 // ─── Mode Button ─────────────────────────────────────────────────
 
-function ModeBtn({ icon, label, active, onPress }) {
+function ModeBtn({ icon, label, active, onPress, colors }) {
+  const styles = getStyles(colors);
+
   return (
     <TouchableOpacity
       style={[styles.modeBtn, active && styles.modeBtnActive]}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Ionicons name={icon} size={20} color={active ? Colors.cyan : Colors.textSecondary} />
-      <Text style={[styles.modeBtnLabel, active && { color: Colors.cyan }]}>{label}</Text>
+      <Ionicons name={icon} size={20} color={active ? colors.cyan : colors.textSecondary} />
+      <Text style={[styles.modeBtnLabel, active && { color: colors.cyan }]}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
 // ─── Styles ──────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: Colors.bg0 },
+const getStyles = (colors) => StyleSheet.create({
+  safe:    { flex: 1, backgroundColor: colors.bg0 },
   scroll:  { flex: 1 },
   content: { paddingBottom: 32 },
 
@@ -166,15 +182,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
-  appTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, letterSpacing: 1 },
+  appTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: colors.textPrimary, letterSpacing: 1 },
   topBarSub: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-  topBarSubText: { fontSize: Typography.xs, color: Colors.textMuted },
+  topBarSubText: { fontSize: Typography.xs, color: colors.textMuted },
+  topBarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  themeBtn: { padding: 6 },
   bellBtn: { padding: 6, position: 'relative' },
   bellBadge: {
     position: 'absolute', top: 2, right: 2,
-    backgroundColor: Colors.amber, borderRadius: Radius.full,
+    backgroundColor: colors.amber, borderRadius: Radius.full,
     width: 14, height: 14, alignItems: 'center', justifyContent: 'center', zIndex: 1,
   },
   bellBadgeText: { fontSize: 9, color: '#000', fontWeight: Typography.bold },
@@ -183,13 +201,13 @@ const styles = StyleSheet.create({
 
   statRow: { flexDirection: 'row', gap: Spacing.sm },
   statCard: {
-    flex: 1, backgroundColor: Colors.bg1,
-    borderWidth: 0.5, borderColor: Colors.border,
+    flex: 1, backgroundColor: colors.bg1,
+    borderWidth: 0.5, borderColor: colors.border,
     borderRadius: Radius.md, padding: Spacing.md,
     alignItems: 'center',
   },
   statValue: { fontSize: Typography.lg, fontWeight: Typography.bold },
-  statLabel: { fontSize: Typography.xs, color: Colors.textMuted, textAlign: 'center', marginTop: 2 },
+  statLabel: { fontSize: Typography.xs, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
 
   botGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
 
@@ -197,19 +215,19 @@ const styles = StyleSheet.create({
   modeBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: Spacing.md,
-    backgroundColor: Colors.bg1, borderWidth: 0.5, borderColor: Colors.border,
+    backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border,
     borderRadius: Radius.md,
   },
-  modeBtnActive: { backgroundColor: Colors.cyanFaint, borderColor: Colors.cyanDim },
-  modeBtnLabel: { fontSize: Typography.sm, fontWeight: Typography.medium, color: Colors.textSecondary },
+  modeBtnActive: { backgroundColor: colors.cyanFaint, borderColor: colors.cyanDim },
+  modeBtnLabel: { fontSize: Typography.sm, fontWeight: Typography.medium, color: colors.textSecondary },
 
   incidentList: { gap: Spacing.sm },
 
   sosBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: Spacing.sm, paddingVertical: 14,
-    backgroundColor: Colors.redDim, borderWidth: 0.5, borderColor: Colors.red + '55',
+    backgroundColor: colors.redDim, borderWidth: 0.5, borderColor: colors.red + '55',
     borderRadius: Radius.lg,
   },
-  sosBtnText: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.red },
+  sosBtnText: { fontSize: Typography.base, fontWeight: Typography.bold, color: colors.red },
 });

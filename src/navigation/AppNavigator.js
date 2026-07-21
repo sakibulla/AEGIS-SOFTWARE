@@ -3,7 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Typography, Spacing } from '../constants/theme';
+import { Typography, Spacing } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import MapScreen       from '../screens/MapScreen';
@@ -20,14 +21,18 @@ const TABS = [
 ];
 
 export default function AppNavigator() {
+  const { colors, isDarkMode } = useTheme();
+
+  const styles = getStyles(colors);
+
   return (
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: styles.tabBar,
-          tabBarActiveTintColor:   Colors.cyan,
-          tabBarInactiveTintColor: Colors.textMuted,
+          tabBarActiveTintColor:   colors.cyan,
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarShowLabel: true,
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ focused, color, size }) => {
@@ -45,11 +50,11 @@ export default function AppNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   tabBar: {
-    backgroundColor: Colors.bg0,
+    backgroundColor: colors.bg0,
     borderTopWidth: 0.5,
-    borderTopColor: Colors.border,
+    borderTopColor: colors.border,
     height: 60,
     paddingBottom: 8,
     paddingTop: 6,

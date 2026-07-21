@@ -9,14 +9,15 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  FlatList,
+  Image,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { Colors, Typography, Spacing, Radius, Shadows } from '../constants/theme';
+import { Typography, Spacing, Radius, Shadows } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { VIDEO_FEEDS, BOTS } from '../constants/mockData';
 import { useStreamUrls } from '../hooks/useStreamUrls';
 
 const FeedsScreen = () => {
+  const { colors } = useTheme();
   const { urls, setUrl, loading: urlsLoading, detectionsUrlFor } = useStreamUrls();
   const [expandedBot, setExpandedBot] = useState(null);
   const [urlModalVisible, setUrlModalVisible] = useState(false);
@@ -24,6 +25,8 @@ const FeedsScreen = () => {
   const [detections, setDetections] = useState({});
   const [detectionLoading, setDetectionLoading] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+
+  const styles = getStyles(colors);
 
   // Poll detections every 1s when a feed is expanded
   useEffect(() => {
@@ -76,7 +79,9 @@ const FeedsScreen = () => {
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  const renderFeedCard = ({ item: feed }) => {
+  const renderFeedCard = (feed) => {
+    if (!feed || !feed.botId) return null;
+    
     const botInfo = getBotInfo(feed.botId);
     const streamUrl = urls[feed.botId];
     const isExpanded = expandedBot === feed.botId;
@@ -120,29 +125,10 @@ const FeedsScreen = () => {
         {/* Feed Content */}
         {streamUrl ? (
           <View style={styles.feedContent}>
-            <WebView
-              source={{
-                html: `
-                  <html>
-                    <head>
-                      <style>
-                        body { margin: 0; background: #000; }
-                        img { 
-                          width: 100%; 
-                          height: 100%; 
-                          object-fit: cover; 
-                          display: block;
-                        }
-                      </style>
-                    </head>
-                    <body>
-                      <img src="${streamUrl}" />
-                    </body>
-                  </html>
-                `,
-              }}
-              style={styles.webview}
-              scalesPageToFit={true}
+            <Image
+              source={{ uri: streamUrl }}
+              style={styles.feedImage}
+              onError={() => console.warn(`Failed to load stream: ${streamUrl}`)}
             />
           </View>
         ) : (
@@ -185,7 +171,7 @@ const FeedsScreen = () => {
               <View style={styles.detectionsSection}>
                 <Text style={styles.detectionsTitle}>Real-time Detections</Text>
                 {detectionLoading[feed.botId] ? (
-                  <ActivityIndicator color={Colors.cyan} size="small" />
+                  <ActivityIndicator color={colors.cyan} size="small" />
                 ) : (detections[feed.botId] || []).length > 0 ? (
                   <View style={styles.detectionChips}>
                     {detections[feed.botId].map((det, idx) => (
@@ -211,27 +197,32 @@ const FeedsScreen = () => {
     return (
       <View style={styles.statusSection}>
         <Text style={styles.statusTitle}>Stream Status</Text>
-        {VIDEO_FEEDS.map(feed => {
-          const streamUrl = urls[feed.botId];
-          return (
-            <View key={feed.id} style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{feed.label}</Text>
-              <Text style={styles.statusUrl}>
-                {streamUrl || 'Tap to set URL'}
-              </Text>
-              <View
-                style={[
-                  styles.statusBadge,
-                  streamUrl ? styles.setBadge : styles.emptyBadge,
-                ]}
-              >
-                <Text style={styles.statusBadgeText}>
-                  {streamUrl ? 'SET' : 'EMPTY'}
+        {VIDEO_FEEDS && VIDEO_FEEDS.length > 0 ? (
+          VIDEO_FEEDS.map((feed) => {
+            if (!feed) return null;
+            const streamUrl = urls[feed.botId];
+            return (
+              <View key={feed.id} style={styles.statusItem}>
+                <Text style={styles.statusLabel}>{feed.label}</Text>
+                <Text style={styles.statusUrl}>
+                  {streamUrl || 'Tap to set URL'}
                 </Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    streamUrl ? styles.setBadge : styles.emptyBadge,
+                  ]}
+                >
+                  <Text style={styles.statusBadgeText}>
+                    {streamUrl ? 'SET' : 'EMPTY'}
+                  </Text>
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        ) : (
+          <Text style={styles.statusLabel}>No feeds available</Text>
+        )}
       </View>
     );
   };
@@ -262,7 +253,7 @@ const FeedsScreen = () => {
   if (urlsLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color={Colors.cyan} size="large" />
+        <ActivityIndicator color={colors.cyan} size="large" />
         <Text style={styles.loadingText}>Loading streams...</Text>
       </View>
     );
@@ -275,12 +266,12 @@ const FeedsScreen = () => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={Colors.cyan}
+          tintColor={colors.cyan}
         />
       }
     >
       {/* Feed Cards */}
-      {VIDEO_FEEDS.map(renderFeedCard)}
+      {VIDEO_FEEDS.map((feed) => renderFeedCard(feed))}
 
       {/* Stream Status List */}
       {renderStreamStatusList()}
@@ -301,7 +292,7 @@ const FeedsScreen = () => {
             <TextInput
               style={styles.modalInput}
               placeholder="http://192.168.1.100:8000/video_feed"
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={colors.textMuted}
               value={tempUrl}
               onChangeText={setTempUrl}
               editable={true}
@@ -327,37 +318,37 @@ const FeedsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg0,
+    backgroundColor: colors.bg0,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: Colors.bg0,
+    backgroundColor: colors.bg0,
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: Spacing.md,
     fontSize: Typography.base,
   },
 
   // Feed Cards
   feedCard: {
-    backgroundColor: Colors.bg1,
+    backgroundColor: colors.bg1,
     borderRadius: Radius.md,
     marginBottom: Spacing.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     ...Shadows.card,
   },
   feedCardExpanded: {
-    borderColor: Colors.cyan,
+    borderColor: colors.cyan,
     borderWidth: 2,
   },
   feedHeader: {
@@ -366,9 +357,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
   feedHeaderLeft: {
     flexDirection: 'row',
@@ -378,28 +369,28 @@ const styles = StyleSheet.create({
   feedName: {
     fontSize: Typography.md,
     fontWeight: Typography.bold,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   liveBadge: {
-    backgroundColor: Colors.greenDim,
+    backgroundColor: colors.greenDim,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.sm,
   },
   liveBadgeText: {
     fontSize: Typography.xs,
-    color: Colors.green,
+    color: colors.green,
     fontWeight: Typography.bold,
   },
   offlineBadge: {
-    backgroundColor: Colors.redDim,
+    backgroundColor: colors.redDim,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.sm,
   },
   offlineBadgeText: {
     fontSize: Typography.xs,
-    color: Colors.red,
+    color: colors.red,
     fontWeight: Typography.bold,
   },
   settingsButton: {
@@ -413,15 +404,24 @@ const styles = StyleSheet.create({
   feedContent: {
     height: 250,
     backgroundColor: '#000',
+    overflow: 'hidden',
   },
-  webview: {
+  feedImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  loadingOverlay: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.bg2,
   },
   placeholderFeed: {
     height: 250,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
   },
   placeholderIcon: {
     fontSize: 48,
@@ -429,12 +429,12 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: Typography.md,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: Spacing.xs,
   },
   placeholderSubtext: {
     fontSize: Typography.sm,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
 
   // Expanded Section
@@ -442,8 +442,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.bg1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.bg1,
   },
   controlButtons: {
     flexDirection: 'row',
@@ -453,14 +453,14 @@ const styles = StyleSheet.create({
   controlButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
     borderRadius: Radius.sm,
     borderWidth: 1,
-    borderColor: Colors.cyan,
+    borderColor: colors.cyan,
   },
   controlButtonText: {
     fontSize: Typography.sm,
-    color: Colors.cyan,
+    color: colors.cyan,
     fontWeight: Typography.bold,
   },
 
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   detectionsTitle: {
     fontSize: Typography.sm,
     fontWeight: Typography.bold,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: Spacing.sm,
   },
   detectionChips: {
@@ -480,21 +480,21 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   detectionChip: {
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderWidth: 1,
-    borderColor: Colors.cyan,
+    borderColor: colors.cyan,
   },
   detectionLabel: {
     fontSize: Typography.xs,
-    color: Colors.cyan,
+    color: colors.cyan,
     fontWeight: Typography.medium,
   },
   noDetectionsText: {
     fontSize: Typography.sm,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
 
   // Status Section
@@ -505,26 +505,26 @@ const styles = StyleSheet.create({
   statusTitle: {
     fontSize: Typography.md,
     fontWeight: Typography.bold,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: Spacing.md,
   },
   statusItem: {
-    backgroundColor: Colors.bg1,
+    backgroundColor: colors.bg1,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   statusLabel: {
     fontSize: Typography.sm,
     fontWeight: Typography.bold,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: Spacing.xs,
   },
   statusUrl: {
     fontSize: Typography.xs,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginBottom: Spacing.sm,
   },
   statusBadge: {
@@ -534,40 +534,40 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
   },
   setBadge: {
-    backgroundColor: Colors.greenDim,
+    backgroundColor: colors.greenDim,
   },
   emptyBadge: {
-    backgroundColor: Colors.amberDim,
+    backgroundColor: colors.amberDim,
   },
   statusBadgeText: {
     fontSize: Typography.xs,
     fontWeight: Typography.bold,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
 
   // Info Card
   infoCard: {
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginVertical: Spacing.lg,
     borderLeftWidth: 4,
-    borderLeftColor: Colors.cyan,
+    borderLeftColor: colors.cyan,
   },
   infoTitle: {
     fontSize: Typography.md,
     fontWeight: Typography.bold,
-    color: Colors.cyan,
+    color: colors.cyan,
     marginBottom: Spacing.sm,
   },
   infoText: {
     fontSize: Typography.sm,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: Spacing.md,
   },
   infoStep: {
     fontSize: Typography.xs,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginBottom: Spacing.xs,
   },
 
@@ -579,28 +579,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.bg1,
+    backgroundColor: colors.bg1,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     width: '80%',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   modalTitle: {
     fontSize: Typography.md,
     fontWeight: Typography.bold,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: Spacing.md,
   },
   modalInput: {
-    backgroundColor: Colors.bg3,
+    backgroundColor: colors.bg3,
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: Typography.sm,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     marginBottom: Spacing.lg,
   },
   modalButtons: {
@@ -615,22 +615,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   cancelButton: {
-    backgroundColor: Colors.bg2,
+    backgroundColor: colors.bg2,
   },
   saveButton: {
-    backgroundColor: Colors.cyanFaint,
-    borderColor: Colors.cyan,
+    backgroundColor: colors.cyanFaint,
+    borderColor: colors.cyan,
   },
   modalButtonText: {
     fontSize: Typography.sm,
     fontWeight: Typography.bold,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   saveButtonText: {
-    color: Colors.cyan,
+    color: colors.cyan,
   },
 });
 

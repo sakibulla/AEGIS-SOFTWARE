@@ -7,7 +7,7 @@ export const BOTS = [
     role: 'Explorer · SLAM',
     status: 'online',       // 'online' | 'alert' | 'offline'
     battery: 82,
-    mapCoverage: 78,
+    mapCoverage: 78,  
     location: { x: 0.18, y: 0.50 },   // normalized 0–1 for map overlay
     color: '#3dd68c',
     icon: 'map-search',

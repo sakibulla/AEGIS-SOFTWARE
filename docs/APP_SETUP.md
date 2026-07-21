@@ -80,26 +80,13 @@ aegis-app/
 
 ### Live MJPEG Feeds
 
-Each robot runs a Flask-based vision server that streams MJPEG video and object detection data. See `aegis-yolo-server/README.md` for setup.
+Each robot streams MJPEG video from its camera. Configure stream URLs in the app settings.
 
 ### Connecting to Robot Streams
 
-1. Start the vision server on each robot (see server README)
-2. Note the local IP and port (e.g., `http://192.168.1.100:8000`)
-3. In the app, tap **Settings** on a feed card and paste the `/video_feed` URL
-4. The app stores URLs in AsyncStorage for persistence
-
-### Stream URL Format
-
-```
-http://<robot-ip>:8000/video_feed
-```
-
-To view detections JSON:
-
-```
-http://<robot-ip>:8000/detections
-```
+1. Note the robot IP and streaming port (e.g., `http://192.168.1.100:8080`)
+2. In the app, tap **Settings** on a feed card and paste the stream URL
+3. The app stores URLs in AsyncStorage for persistence
 
 ## Available Scripts
 
