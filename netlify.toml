@@ -1,5 +1,4 @@
 [build]
-  command = "npm install && npx expo export --platform web"
   publish = "dist"
 
 [[redirects]]

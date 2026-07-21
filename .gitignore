@@ -3,8 +3,7 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
-# Build output
-dist/
+# Build output (excluded)
 web-build/
 build/
 
@@ -17,7 +16,6 @@ build/
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
 
 # IDEs
 .vscode/
