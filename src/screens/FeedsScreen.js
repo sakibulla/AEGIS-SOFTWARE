@@ -16,7 +16,7 @@ import { useTheme } from '../context/ThemeContext';
 import { VIDEO_FEEDS, BOTS } from '../constants/mockData';
 import { useStreamUrls } from '../hooks/useStreamUrls';
 
-const FeedsScreen = () => {
+export default function FeedsScreen() {
   const { colors } = useTheme();
   const { urls, setUrl, loading: urlsLoading, detectionsUrlFor } = useStreamUrls();
   const [expandedBot, setExpandedBot] = useState(null);
@@ -316,7 +316,7 @@ const FeedsScreen = () => {
       </Modal>
     </ScrollView>
   );
-};
+}
 
 const getStyles = (colors) => StyleSheet.create({
   container: {
@@ -633,5 +633,3 @@ const getStyles = (colors) => StyleSheet.create({
     color: colors.cyan,
   },
 });
-
-export default FeedsScreen;

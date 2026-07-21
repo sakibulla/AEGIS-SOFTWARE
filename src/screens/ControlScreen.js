@@ -9,6 +9,7 @@ import { Typography, Spacing, Radius } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { StatusPip } from '../components/SwarmUI';
 import { BOTS } from '../constants/mockData';
+import { sendBotCommand } from '../services/AegisService';
 
 export default function ControlScreen() {
   const { colors } = useTheme();

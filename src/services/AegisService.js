@@ -16,7 +16,7 @@ export async function fetchIncidents() {
 }
 
 export async function sendBotCommand(botId, command, payload = {}) {
-  // command: 'move' | 'stop' | 'mode_autonomous' | 'mode_manual'
+  // command: 'move' | 'stop' | 'mode_autonomous' | 'mode_manual' | 'return_base' | 'ai_scan' | 'share_map' | 'emergency_ping'
   const res = await fetch(`${SERVER_URL}/api/bots/${botId}/command`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
