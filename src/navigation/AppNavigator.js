@@ -7,7 +7,7 @@ import { Typography, Spacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 
 import DashboardScreen from '../screens/DashboardScreen';
-import MapScreen       from '../screens/MapScreen';
+import MapScreen       from '../screens/MapScreen.web';
 import FeedsScreen     from '../screens/FeedsScreen';
 import ControlScreen   from '../screens/ControlScreen';
 
