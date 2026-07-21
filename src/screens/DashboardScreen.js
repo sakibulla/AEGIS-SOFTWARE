@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  StatusBar, Alert, Dimensions,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,19 +24,13 @@ export default function DashboardScreen({ navigation }) {
   const alertCount  = BOTS.filter(b => b.status === 'alert').length;
 
   function handleSOS() {
-    Alert.alert(
-      'Emergency Override',
-      'This will contact emergency services and broadcast a DANGER packet to all bots.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm SOS', style: 'destructive', onPress: () => console.log('SOS triggered') },
-      ]
-    );
+    if (typeof alert === 'function') {
+      alert('SOS triggered - Emergency services contacted');
+    }
   }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.bg0} />
 
       {/* ── Top Bar ── */}
       <View style={styles.topBar}>
