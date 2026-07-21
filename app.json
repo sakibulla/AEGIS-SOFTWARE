@@ -1,24 +1,26 @@
 {
-  "name": "AEGIS",
-  "displayName": "AEGIS",
   "expo": {
     "name": "AEGIS",
+    "displayName": "AEGIS",
     "slug": "aegis-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "aegis",
-    "platforms": ["ios", "android", "web"],
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "sdkVersion": "52.0.0",
     "web": {
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   },
   "android": {
     "package": "com.anonymous.aegisapp"
