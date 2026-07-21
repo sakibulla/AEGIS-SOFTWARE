@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Pressable,
-  Vibration, Dimensions, ScrollView,
+  Dimensions, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,6 @@ import { Typography, Spacing, Radius } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { StatusPip } from '../components/SwarmUI';
 import { BOTS } from '../constants/mockData';
-import { sendBotCommand } from '../services/AegisService';
 
 export default function ControlScreen() {
   const { colors } = useTheme();
@@ -24,17 +23,15 @@ export default function ControlScreen() {
 
   function startMove(dir) {
     setActiveDir(dir);
-    Vibration.vibrate(30);
-    sendBotCommand(selectedBot, 'move', { direction: dir, speed }).catch(() => {});
+    // Vibration is not available on web
     intervalRef.current = setInterval(() => {
-      sendBotCommand(selectedBot, 'move', { direction: dir, speed }).catch(() => {});
+      // Send command would go here
     }, 150);
   }
 
   function stopMove() {
     setActiveDir(null);
     clearInterval(intervalRef.current);
-    sendBotCommand(selectedBot, 'stop').catch(() => {});
   }
 
   function switchMode(m) {
