@@ -55,7 +55,7 @@ Built as a senior design project at the Department of ECE, North South Universit
 
 **Shahriar Jaman** · **MD Sakib Sarker** · **Ahmed Sadman Sadik** · **Mohammed Bin Ahmed** · **Zahid Hasan Rana** · **Md. Fahmidul Hasan**
 
-Supervised by **Dr. Shahnewaz Siddique**, Associate Professor, Department of ECE, North South University
+Supervised by **Dr. Shahnewaz Siddique**, Associate Professor, Department of Electrical and Computer Engineering (ECE), North South University (NSU)
 
 ---
 

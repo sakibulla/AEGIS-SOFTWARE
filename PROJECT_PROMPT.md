@@ -396,7 +396,7 @@ Serve HTML from your Python Flask backend alongside API endpoints.
 
 **AEGIS Team**: Shahriar Jaman, MD Sakib Sarker, Ahmed Sadman Sadik, Mohammed Bin Ahmed, Zahid Hasan Rana, Md. Fahmidul Hasan
 
-**Supervised by**: Dr. Shahnewaz Siddique, Associate Professor, Department of ECE, North South University
+**Supervised by**: Dr. Shahnewaz Siddique, Associate Professor, Department of Electrical and Computer Engineering (ECE), North South University (NSU)
 
 ---
 
