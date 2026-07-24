@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { WebView } from 'react-native-webview';
 import { Typography, Spacing, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -62,6 +63,12 @@ export default function DashboardScreen({ navigation }) {
             {ALERTS.map(a => <AlertBanner key={a.id} alert={a} />)}
           </View>
         )}
+
+        {/* ── Project Video ── */}
+        <View style={styles.section}>
+          <SectionLabel>Project Overview</SectionLabel>
+          <ProjectVideo colors={colors} responsive={responsive} />
+        </View>
 
         {/* ── Swarm Stat Cards ── */}
         <View style={styles.section}>
@@ -129,6 +136,135 @@ export default function DashboardScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+// ─── Project Video ───────────────────────────────────────────────
+
+function ProjectVideo({ colors, responsive }) {
+  const [showVideo, setShowVideo] = useState(true);
+  const styles = getVideoStyles(colors, responsive);
+  
+  const videoId = 'x5oWp0QmJTI';
+  const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+
+  const handleOpenYouTube = () => {
+    Linking.openURL(youtubeUrl).catch(err => console.error('Failed to open URL:', err));
+  };
+
+  if (!showVideo) {
+    return (
+      <TouchableOpacity style={styles.videoPlaceholder} onPress={() => setShowVideo(true)} activeOpacity={0.8}>
+        <Ionicons name="play-circle" size={64} color={colors.cyan} />
+        <Text style={styles.videoPlaceholderText}>Watch Project Demo</Text>
+        <Text style={styles.videoPlaceholderSub}>A.E.G.I.S. Robot Swarm in Action</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View style={styles.videoContainer}>
+      {Platform.OS === 'web' ? (
+        <iframe
+          src={embedUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            borderRadius: '10px',
+          }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="AEGIS Project Video"
+        />
+      ) : (
+        <WebView
+          source={{ uri: embedUrl }}
+          style={styles.webview}
+          allowsFullscreenVideo
+          mediaPlaybackRequiresUserAction={false}
+          javaScriptEnabled
+          domStorageEnabled
+        />
+      )}
+      <View style={styles.videoActions}>
+        <TouchableOpacity style={styles.videoActionBtn} onPress={() => setShowVideo(false)}>
+          <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+          <Text style={styles.videoActionText}>Hide Video</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.videoActionBtn} onPress={handleOpenYouTube}>
+          <Ionicons name="open-outline" size={20} color={colors.cyan} />
+          <Text style={[styles.videoActionText, { color: colors.cyan }]}>Open in YouTube</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const getVideoStyles = (colors, responsive) => {
+  const typo = getResponsiveTypography(responsive.deviceType);
+  const space = getResponsiveSpacing(responsive.deviceType);
+  
+  const videoHeight = responsive.isDesktop ? 500 : responsive.isTablet ? 400 : 250;
+
+  return StyleSheet.create({
+    videoContainer: {
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      borderRadius: Radius.lg,
+      overflow: 'hidden',
+    },
+    webview: {
+      height: videoHeight,
+      backgroundColor: '#000',
+    },
+    videoActions: {
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
+      justifyContent: 'space-between',
+      padding: space.md,
+      gap: space.sm,
+      backgroundColor: colors.bg2,
+      borderTopWidth: 0.5,
+      borderTopColor: colors.border,
+    },
+    videoActionBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.sm,
+      paddingVertical: space.sm,
+      paddingHorizontal: space.md,
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+      flex: responsive.isSmallDevice ? 0 : 1,
+    },
+    videoActionText: {
+      fontSize: typo.sm,
+      fontWeight: Typography.medium,
+      color: colors.textSecondary,
+    },
+    videoPlaceholder: {
+      height: videoHeight,
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      borderRadius: Radius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: space.md,
+    },
+    videoPlaceholderText: {
+      fontSize: typo.lg,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+    },
+    videoPlaceholderSub: {
+      fontSize: typo.sm,
+      color: colors.textSecondary,
+    },
+  });
+};
 
 // ─── Stat Card ────────────────────────────────────────────────────
 
