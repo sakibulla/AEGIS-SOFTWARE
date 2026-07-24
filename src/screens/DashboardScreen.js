@@ -559,11 +559,13 @@ const getStyles = (colors, responsive) => {
 
     statRow: { 
       flexDirection: responsive.isSmallDevice ? 'column' : 'row', 
-      gap: space.sm 
+      gap: space.sm,
+      width: '100%',
     },
     statCard: {
-      flex: responsive.isSmallDevice ? 0 : 1,
-      width: responsive.isSmallDevice ? '100%' : 'auto',
+      flex: responsive.isSmallDevice ? undefined : 1,
+      width: responsive.isSmallDevice ? '100%' : undefined,
+      minWidth: responsive.isSmallDevice ? undefined : 0,
       backgroundColor: colors.bg1,
       borderWidth: 0.5, 
       borderColor: colors.border,
