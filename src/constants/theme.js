@@ -78,7 +78,7 @@ export const ColorSchemes = {
 };
 
 export const Typography = {
-  // Font sizes
+  // Font sizes (base sizes - can be scaled with scaleFont)
   xs:   10,
   sm:   12,
   base: 14,
@@ -93,6 +93,29 @@ export const Typography = {
   bold:    '600',
 };
 
+// Responsive typography - returns font sizes based on device type
+export const getResponsiveTypography = (deviceType) => {
+  const scale = {
+    mobile: 1,
+    tablet: 1.1,
+    desktop: 1.15,
+    wide: 1.2,
+  }[deviceType] || 1;
+
+  return {
+    xs:   Math.round(10 * scale),
+    sm:   Math.round(12 * scale),
+    base: Math.round(14 * scale),
+    md:   Math.round(16 * scale),
+    lg:   Math.round(18 * scale),
+    xl:   Math.round(22 * scale),
+    xxl:  Math.round(28 * scale),
+    regular: '400',
+    medium:  '500',
+    bold:    '600',
+  };
+};
+
 export const Spacing = {
   xs:  4,
   sm:  8,
@@ -100,6 +123,25 @@ export const Spacing = {
   lg:  16,
   xl:  20,
   xxl: 28,
+};
+
+// Responsive spacing - returns spacing values based on device type
+export const getResponsiveSpacing = (deviceType) => {
+  const scale = {
+    mobile: 1,
+    tablet: 1.2,
+    desktop: 1.4,
+    wide: 1.5,
+  }[deviceType] || 1;
+
+  return {
+    xs:  Math.round(4 * scale),
+    sm:  Math.round(8 * scale),
+    md:  Math.round(12 * scale),
+    lg:  Math.round(16 * scale),
+    xl:  Math.round(20 * scale),
+    xxl: Math.round(28 * scale),
+  };
 };
 
 export const Radius = {

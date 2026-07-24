@@ -3,8 +3,9 @@ import {
   View, Text, StyleSheet, Animated, TouchableOpacity, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Typography, Spacing, Radius } from '../constants/theme';
+import { Typography, Spacing, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
+import { useResponsive } from '../utils/responsive';
 
 // ─── StatusPip ────────────────────────────────────────────────────
 
@@ -39,40 +40,48 @@ export function StatusPip({ status }) {
 
 // ─── BotCard ──────────────────────────────────────────────────────
 
-export function BotCard({ bot, onPress }) {
+export function BotCard({ bot, onPress, responsive: responsiveProp }) {
   const { colors } = useTheme();
+  const responsiveHook = useResponsive();
+  const responsive = responsiveProp || responsiveHook;
 
   const borderColor = bot.status === 'online' ? colors.greenDim
     : bot.status === 'alert' ? colors.amberDim
     : colors.border;
 
+  const iconSize = responsive.isDesktop ? 22 : responsive.isTablet ? 20 : 18;
+  const cardWidth = responsive.isDesktop ? '32%' : responsive.isTablet ? '48%' : '100%';
+
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles(colors).botCard, { borderColor, opacity: pressed ? 0.85 : 1 }]}
+      style={({ pressed }) => [
+        styles(colors, responsive).botCard, 
+        { borderColor, opacity: pressed ? 0.85 : 1, width: cardWidth }
+      ]}
     >
-      <View style={styles(colors).botCardHeader}>
-        <View style={[styles(colors).botIcon, { backgroundColor: bot.color + '22' }]}>
-          <Ionicons name={iconMap[bot.icon] || 'hardware-chip'} size={18} color={bot.color} />
+      <View style={styles(colors, responsive).botCardHeader}>
+        <View style={[styles(colors, responsive).botIcon, { backgroundColor: bot.color + '22' }]}>
+          <Ionicons name={iconMap[bot.icon] || 'hardware-chip'} size={iconSize} color={bot.color} />
         </View>
         <StatusPip status={bot.status} />
       </View>
-      <Text style={styles(colors).botName}>{bot.name}</Text>
-      <Text style={styles(colors).botRole}>{bot.role}</Text>
-      <View style={styles(colors).botStatRow}>
+      <Text style={styles(colors, responsive).botName}>{bot.name}</Text>
+      <Text style={styles(colors, responsive).botRole}>{bot.role}</Text>
+      <View style={styles(colors, responsive).botStatRow}>
         <Ionicons name="battery-half" size={12} color={colors.textMuted} />
-        <Text style={styles(colors).botStat}>{bot.battery}%</Text>
+        <Text style={styles(colors, responsive).botStat}>{bot.battery}%</Text>
         {bot.mapCoverage != null && (
           <>
-            <Text style={styles(colors).botStatSep}>·</Text>
+            <Text style={styles(colors, responsive).botStatSep}>·</Text>
             <Ionicons name="map" size={12} color={colors.textMuted} />
-            <Text style={styles(colors).botStat}>{bot.mapCoverage}% mapped</Text>
+            <Text style={styles(colors, responsive).botStat}>{bot.mapCoverage}% mapped</Text>
           </>
         )}
       </View>
-      <View style={styles(colors).botTaskRow}>
+      <View style={styles(colors, responsive).botTaskRow}>
         {bot.tasks.slice(0, 1).map((t, i) => (
-          <Text key={i} style={styles(colors).botTask} numberOfLines={1}>{t}</Text>
+          <Text key={i} style={styles(colors, responsive).botTask} numberOfLines={1}>{t}</Text>
         ))}
       </View>
     </Pressable>
@@ -181,63 +190,75 @@ const iconMap = {
 
 // ─── Styles ──────────────────────────────────────────────────────
 
-const styles = (colors) => StyleSheet.create({
-  pip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: Radius.full },
-  pipDot: { width: 5, height: 5, borderRadius: Radius.full },
-  pipLabel: { fontSize: Typography.xs, fontWeight: Typography.bold, letterSpacing: 0.5 },
+const styles = (colors, responsive) => {
+  const resp = responsive || { deviceType: 'mobile', isDesktop: false, isTablet: false };
+  const typo = getResponsiveTypography(resp.deviceType);
+  const space = getResponsiveSpacing(resp.deviceType);
 
-  botCard: {
-    flex: 1,
-    backgroundColor: colors.bg1,
-    borderWidth: 0.5,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-  },
-  botCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: Spacing.sm },
-  botIcon: { width: 34, height: 34, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
-  botName: { fontSize: Typography.base, fontWeight: Typography.bold, color: colors.textPrimary, marginBottom: 2 },
-  botRole: { fontSize: Typography.xs, color: colors.textSecondary, marginBottom: Spacing.sm },
-  botStatRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  botStat: { fontSize: Typography.xs, color: colors.textMuted },
-  botStatSep: { fontSize: Typography.xs, color: colors.textMuted },
-  botTaskRow: { marginTop: 6 },
-  botTask: { fontSize: 10, color: colors.textSecondary },
+  return StyleSheet.create({
+    pip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: Radius.full },
+    pipDot: { width: 5, height: 5, borderRadius: Radius.full },
+    pipLabel: { fontSize: typo.xs, fontWeight: Typography.bold, letterSpacing: 0.5 },
 
-  alertBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 0.5,
-  },
-  alertDot: { width: 8, height: 8, borderRadius: Radius.full },
-  alertBody: { flex: 1 },
-  alertTitle: { fontSize: Typography.sm, fontWeight: Typography.bold },
-  alertDetail: { fontSize: Typography.xs, color: colors.textSecondary, marginTop: 1 },
-  alertTime: { fontSize: Typography.xs },
+    botCard: {
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5,
+      borderRadius: Radius.lg,
+      padding: resp.isDesktop ? space.lg : space.md,
+      minWidth: resp.isSmallDevice ? '100%' : '30%',
+    },
+    botCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: space.sm },
+    botIcon: { 
+      width: resp.isDesktop ? 38 : 34, 
+      height: resp.isDesktop ? 38 : 34, 
+      borderRadius: Radius.md, 
+      alignItems: 'center', 
+      justifyContent: 'center' 
+    },
+    botName: { fontSize: typo.base, fontWeight: Typography.bold, color: colors.textPrimary, marginBottom: 2 },
+    botRole: { fontSize: typo.xs, color: colors.textSecondary, marginBottom: space.sm },
+    botStatRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    botStat: { fontSize: typo.xs, color: colors.textMuted },
+    botStatSep: { fontSize: typo.xs, color: colors.textMuted },
+    botTaskRow: { marginTop: 6 },
+    botTask: { fontSize: 10, color: colors.textSecondary },
 
-  incidentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: colors.bg1,
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-  },
-  incIcon: { width: 30, height: 30, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
-  incBody: { flex: 1 },
-  incTitle: { fontSize: Typography.sm, fontWeight: Typography.medium, color: colors.textPrimary },
-  incSub: { fontSize: Typography.xs, color: colors.textSecondary, marginTop: 1 },
-  incTime: { fontSize: Typography.xs, color: colors.textMuted },
+    alertBanner: {
+      flexDirection: resp.isSmallDevice ? 'column' : 'row',
+      alignItems: resp.isSmallDevice ? 'flex-start' : 'center',
+      gap: space.sm,
+      padding: space.md,
+      borderRadius: Radius.lg,
+      borderWidth: 0.5,
+    },
+    alertDot: { width: 8, height: 8, borderRadius: Radius.full },
+    alertBody: { flex: 1 },
+    alertTitle: { fontSize: typo.sm, fontWeight: Typography.bold },
+    alertDetail: { fontSize: typo.xs, color: colors.textSecondary, marginTop: 1 },
+    alertTime: { fontSize: typo.xs },
 
-  sectionLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
-  sectionLabel: { fontSize: Typography.xs, fontWeight: Typography.bold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  sectionAction: { fontSize: Typography.xs },
+    incidentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.sm,
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+      padding: space.md,
+    },
+    incIcon: { width: 30, height: 30, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
+    incBody: { flex: 1 },
+    incTitle: { fontSize: typo.sm, fontWeight: Typography.medium, color: colors.textPrimary },
+    incSub: { fontSize: typo.xs, color: colors.textSecondary, marginTop: 1 },
+    incTime: { fontSize: typo.xs, color: colors.textMuted },
 
-  meshBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, paddingVertical: 3, borderRadius: Radius.full, borderWidth: 0.5 },
-  meshDot: { width: 5, height: 5, borderRadius: Radius.full },
-  meshLabel: { fontSize: Typography.xs, fontWeight: Typography.bold, letterSpacing: 0.4 },
-});
+    sectionLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.sm },
+    sectionLabel: { fontSize: typo.xs, fontWeight: Typography.bold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+    sectionAction: { fontSize: typo.xs },
+
+    meshBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, paddingVertical: 3, borderRadius: Radius.full, borderWidth: 0.5 },
+    meshDot: { width: 5, height: 5, borderRadius: Radius.full },
+    meshLabel: { fontSize: typo.xs, fontWeight: Typography.bold, letterSpacing: 0.4 },
+  });
+};

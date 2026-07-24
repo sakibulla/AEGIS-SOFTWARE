@@ -1,25 +1,26 @@
 import React, { useState, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Pressable,
-  Dimensions, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, Pressable, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Typography, Spacing, Radius } from '../constants/theme';
+import { Typography, Spacing, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { StatusPip } from '../components/SwarmUI';
 import { BOTS } from '../constants/mockData';
 import { sendBotCommand } from '../services/AegisService';
+import { useResponsive } from '../utils/responsive';
 
 export default function ControlScreen() {
   const { colors } = useTheme();
+  const responsive = useResponsive();
   const [selectedBot, setSelectedBot] = useState(BOTS[0].id);
   const [mode, setMode] = useState('manual');       // 'manual' | 'autonomous'
   const [activeDir, setActiveDir] = useState(null);
   const [speed, setSpeed] = useState(50);
   const intervalRef = useRef(null);
 
-  const styles = getStyles(colors);
+  const styles = getStyles(colors, responsive);
   const bot = BOTS.find(b => b.id === selectedBot);
 
   function startMove(dir) {
@@ -75,8 +76,8 @@ export default function ControlScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>CONTROL MODE</Text>
           <View style={styles.modeRow}>
-            <ModeToggle icon="game-controller" label="Manual RC" active={mode === 'manual'} color={colors.cyan} onPress={() => switchMode('manual')} colors={colors} />
-            <ModeToggle icon="cpu" label="Autonomous" active={mode === 'autonomous'} color={colors.green} onPress={() => switchMode('autonomous')} colors={colors} />
+            <ModeToggle icon="game-controller" label="Manual RC" active={mode === 'manual'} color={colors.cyan} onPress={() => switchMode('manual')} colors={colors} responsive={responsive} />
+            <ModeToggle icon="cpu" label="Autonomous" active={mode === 'autonomous'} color={colors.green} onPress={() => switchMode('autonomous')} colors={colors} responsive={responsive} />
           </View>
         </View>
 
@@ -96,17 +97,17 @@ export default function ControlScreen() {
               <View style={styles.dpad}>
                 {/* Forward */}
                 <View style={styles.dpadRow}>
-                  <DPadBtn icon="arrow-up" dir="forward" active={activeDir === 'forward'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} />
+                  <DPadBtn icon="arrow-up" dir="forward" active={activeDir === 'forward'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} responsive={responsive} />
                 </View>
                 {/* Left / Stop / Right */}
                 <View style={styles.dpadRow}>
-                  <DPadBtn icon="arrow-back" dir="left" active={activeDir === 'left'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} />
-                  <DPadBtn icon="stop" dir="stop" active={activeDir === 'stop'} color={colors.red} onStart={() => { stopMove(); setActiveDir('stop'); }} onStop={() => setActiveDir(null)} colors={colors} />
-                  <DPadBtn icon="arrow-forward" dir="right" active={activeDir === 'right'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} />
+                  <DPadBtn icon="arrow-back" dir="left" active={activeDir === 'left'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} responsive={responsive} />
+                  <DPadBtn icon="stop" dir="stop" active={activeDir === 'stop'} color={colors.red} onStart={() => { stopMove(); setActiveDir('stop'); }} onStop={() => setActiveDir(null)} colors={colors} responsive={responsive} />
+                  <DPadBtn icon="arrow-forward" dir="right" active={activeDir === 'right'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} responsive={responsive} />
                 </View>
                 {/* Backward */}
                 <View style={styles.dpadRow}>
-                  <DPadBtn icon="arrow-down" dir="backward" active={activeDir === 'backward'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} />
+                  <DPadBtn icon="arrow-down" dir="backward" active={activeDir === 'backward'} color={bot.color} onStart={startMove} onStop={stopMove} colors={colors} responsive={responsive} />
                 </View>
               </View>
 
@@ -133,10 +134,10 @@ export default function ControlScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>QUICK COMMANDS</Text>
           <View style={styles.cmdGrid}>
-            <CmdBtn icon="home" label="Return to base" color={colors.cyan} onPress={() => sendBotCommand(selectedBot, 'return_base').catch(() => {})} colors={colors} />
-            <CmdBtn icon="scan" label="AI scan now" color={colors.green} onPress={() => sendBotCommand(selectedBot, 'ai_scan').catch(() => {})} colors={colors} />
-            <CmdBtn icon="map" label="Share map" color={colors.pathfinder} onPress={() => sendBotCommand(selectedBot, 'share_map').catch(() => {})} colors={colors} />
-            <CmdBtn icon="warning" label="Emergency ping" color={colors.red} onPress={() => sendBotCommand(selectedBot, 'emergency_ping').catch(() => {})} colors={colors} />
+            <CmdBtn icon="home" label="Return to base" color={colors.cyan} onPress={() => sendBotCommand(selectedBot, 'return_base').catch(() => {})} colors={colors} responsive={responsive} />
+            <CmdBtn icon="scan" label="AI scan now" color={colors.green} onPress={() => sendBotCommand(selectedBot, 'ai_scan').catch(() => {})} colors={colors} responsive={responsive} />
+            <CmdBtn icon="map" label="Share map" color={colors.pathfinder} onPress={() => sendBotCommand(selectedBot, 'share_map').catch(() => {})} colors={colors} responsive={responsive} />
+            <CmdBtn icon="warning" label="Emergency ping" color={colors.red} onPress={() => sendBotCommand(selectedBot, 'emergency_ping').catch(() => {})} colors={colors} responsive={responsive} />
           </View>
         </View>
 
@@ -144,11 +145,11 @@ export default function ControlScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>LIVE TELEMETRY</Text>
           <View style={styles.telemetryCard}>
-            <TelRow label="Battery"    value={`${bot.battery}%`}    color={bot.battery > 30 ? colors.green : colors.red} colors={colors} />
-            <TelRow label="Status"     value={bot.status.toUpperCase()} color={bot.status === 'online' ? colors.green : colors.amber} colors={colors} />
-            <TelRow label="Role"       value={bot.role} colors={colors} />
-            <TelRow label="Comm link"  value="ESP-NOW + Wi-Fi" color={colors.cyan} colors={colors} />
-            <TelRow label="Firmware"   value="v1.0.0 (ESP-IDF)" colors={colors} />
+            <TelRow label="Battery"    value={`${bot.battery}%`}    color={bot.battery > 30 ? colors.green : colors.red} colors={colors} responsive={responsive} />
+            <TelRow label="Status"     value={bot.status.toUpperCase()} color={bot.status === 'online' ? colors.green : colors.amber} colors={colors} responsive={responsive} />
+            <TelRow label="Role"       value={bot.role} colors={colors} responsive={responsive} />
+            <TelRow label="Comm link"  value="ESP-NOW + Wi-Fi" color={colors.cyan} colors={colors} responsive={responsive} />
+            <TelRow label="Firmware"   value="v1.0.0 (ESP-IDF)" colors={colors} responsive={responsive} />
           </View>
         </View>
 
@@ -159,8 +160,9 @@ export default function ControlScreen() {
 
 // ─── Sub-components ───────────────────────────────────────────────
 
-function DPadBtn({ icon, dir, active, color, onStart, onStop, colors }) {
-  const styles = getStyles(colors);
+function DPadBtn({ icon, dir, active, color, onStart, onStop, colors, responsive }) {
+  const styles = getStyles(colors, responsive);
+  const iconSize = responsive.isDesktop ? 26 : responsive.isTablet ? 24 : 22;
   
   return (
     <Pressable
@@ -168,40 +170,42 @@ function DPadBtn({ icon, dir, active, color, onStart, onStop, colors }) {
       onPressOut={onStop}
       style={[styles.dpadBtn, active && { backgroundColor: color + '30', borderColor: color }]}
     >
-      <Ionicons name={icon} size={22} color={active ? color : colors.textSecondary} />
+      <Ionicons name={icon} size={iconSize} color={active ? color : colors.textSecondary} />
     </Pressable>
   );
 }
 
-function ModeToggle({ icon, label, active, color, onPress, colors }) {
-  const styles = getStyles(colors);
+function ModeToggle({ icon, label, active, color, onPress, colors, responsive }) {
+  const styles = getStyles(colors, responsive);
+  const iconSize = responsive.isDesktop ? 24 : 20;
 
   return (
     <TouchableOpacity
       style={[styles.modeToggle, active && { borderColor: color, backgroundColor: color + '18' }]}
       onPress={onPress}
     >
-      <Ionicons name={icon} size={20} color={active ? color : colors.textSecondary} />
+      <Ionicons name={icon} size={iconSize} color={active ? color : colors.textSecondary} />
       <Text style={[styles.modeToggleLabel, active && { color }]}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
-function CmdBtn({ icon, label, color, onPress, colors }) {
-  const styles = getStyles(colors);
+function CmdBtn({ icon, label, color, onPress, colors, responsive }) {
+  const styles = getStyles(colors, responsive);
+  const iconSize = responsive.isDesktop ? 20 : 18;
 
   return (
     <TouchableOpacity style={styles.cmdBtn} onPress={onPress} activeOpacity={0.8}>
       <View style={[styles.cmdIcon, { backgroundColor: color + '18' }]}>
-        <Ionicons name={icon} size={18} color={color} />
+        <Ionicons name={icon} size={iconSize} color={color} />
       </View>
       <Text style={styles.cmdLabel}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
-function TelRow({ label, value, color, colors }) {
-  const styles = getStyles(colors);
+function TelRow({ label, value, color, colors, responsive }) {
+  const styles = getStyles(colors, responsive);
 
   return (
     <View style={styles.telRow}>
@@ -211,75 +215,159 @@ function TelRow({ label, value, color, colors }) {
   );
 }
 
-const getStyles = (colors) => StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: colors.bg0 },
-  scroll:  { flex: 1 },
-  content: { paddingBottom: 40 },
+const getStyles = (colors, responsive) => {
+  const typo = getResponsiveTypography(responsive.deviceType);
+  const space = getResponsiveSpacing(responsive.deviceType);
+  
+  // D-pad size based on device
+  const dpadBtnSize = responsive.isDesktop ? 80 : responsive.isTablet ? 72 : 64;
 
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,
-    borderBottomWidth: 0.5, borderBottomColor: colors.border,
-  },
-  headerTitle: { fontSize: Typography.lg, fontWeight: Typography.bold, color: colors.textPrimary },
-  modePill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.full },
-  modePillText: { fontSize: Typography.xs, fontWeight: Typography.bold, letterSpacing: 0.5 },
+  return StyleSheet.create({
+    safe:    { flex: 1, backgroundColor: colors.bg0 },
+    scroll:  { flex: 1 },
+    content: { 
+      paddingBottom: space.xxl * 2,
+      maxWidth: responsive.isDesktop ? 1200 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
 
-  section: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl },
-  sectionLabel: { fontSize: Typography.xs, fontWeight: Typography.bold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: Spacing.sm },
+    header: {
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
+      justifyContent: 'space-between', 
+      alignItems: responsive.isSmallDevice ? 'flex-start' : 'center',
+      paddingHorizontal: space.lg, 
+      paddingVertical: space.md,
+      borderBottomWidth: 0.5, 
+      borderBottomColor: colors.border,
+      gap: responsive.isSmallDevice ? space.sm : 0,
+    },
+    headerTitle: { fontSize: typo.lg, fontWeight: Typography.bold, color: colors.textPrimary },
+    modePill: { 
+      paddingHorizontal: responsive.isDesktop ? space.md : 10, 
+      paddingVertical: responsive.isDesktop ? 6 : 4, 
+      borderRadius: Radius.full 
+    },
+    modePillText: { fontSize: typo.xs, fontWeight: Typography.bold, letterSpacing: 0.5 },
 
-  botSelectorRow: { gap: Spacing.sm },
-  botSel: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 10, paddingHorizontal: Spacing.md,
-    backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border, borderRadius: Radius.md,
-  },
-  botSelDot: { width: 8, height: 8, borderRadius: Radius.full },
-  botSelName: { flex: 1, fontSize: Typography.sm, fontWeight: Typography.medium, color: colors.textSecondary },
+    section: { paddingHorizontal: space.lg, paddingTop: space.xl },
+    sectionLabel: { fontSize: typo.xs, fontWeight: Typography.bold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: space.sm },
 
-  modeRow: { flexDirection: 'row', gap: Spacing.sm },
-  modeToggle: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm,
-    paddingVertical: Spacing.md, backgroundColor: colors.bg1,
-    borderWidth: 0.5, borderColor: colors.border, borderRadius: Radius.md,
-  },
-  modeToggleLabel: { fontSize: Typography.sm, fontWeight: Typography.medium, color: colors.textSecondary },
+    botSelectorRow: { gap: space.sm },
+    botSel: {
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: space.sm, 
+      paddingVertical: responsive.isDesktop ? space.md : 10, 
+      paddingHorizontal: space.md,
+      backgroundColor: colors.bg1, 
+      borderWidth: 0.5, 
+      borderColor: colors.border, 
+      borderRadius: Radius.md,
+    },
+    botSelDot: { width: 8, height: 8, borderRadius: Radius.full },
+    botSelName: { flex: 1, fontSize: typo.sm, fontWeight: Typography.medium, color: colors.textSecondary },
 
-  dpadWrap: {
-    backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border,
-    borderRadius: Radius.lg, padding: Spacing.lg, alignItems: 'center', gap: Spacing.lg,
-  },
-  speedDisplay: { alignItems: 'center' },
-  speedValue: { fontSize: Typography.xxl, fontWeight: Typography.bold, color: colors.textPrimary },
-  speedLabel: { fontSize: Typography.xs, color: colors.textMuted, letterSpacing: 0.8 },
+    modeRow: { 
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row', 
+      gap: space.sm 
+    },
+    modeToggle: {
+      flex: responsive.isSmallDevice ? 0 : 1,
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      gap: space.sm,
+      paddingVertical: responsive.isDesktop ? space.lg : space.md, 
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5, 
+      borderColor: colors.border, 
+      borderRadius: Radius.md,
+    },
+    modeToggleLabel: { fontSize: typo.sm, fontWeight: Typography.medium, color: colors.textSecondary },
 
-  dpad: { gap: 6 },
-  dpadRow: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  dpadBtn: {
-    width: 64, height: 64, borderRadius: Radius.md,
-    backgroundColor: colors.bg2, borderWidth: 0.5, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
+    dpadWrap: {
+      backgroundColor: colors.bg1, 
+      borderWidth: 0.5, 
+      borderColor: colors.border,
+      borderRadius: Radius.lg, 
+      padding: space.lg, 
+      alignItems: 'center', 
+      gap: space.lg,
+    },
+    speedDisplay: { alignItems: 'center' },
+    speedValue: { fontSize: typo.xxl, fontWeight: Typography.bold, color: colors.textPrimary },
+    speedLabel: { fontSize: typo.xs, color: colors.textMuted, letterSpacing: 0.8 },
 
-  speedSliderWrap: { width: '100%', gap: Spacing.sm },
-  speedSliderLabel: { fontSize: Typography.xs, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
-  speedBtns: { flexDirection: 'row', gap: Spacing.sm },
-  speedBtn: {
-    flex: 1, paddingVertical: 8, alignItems: 'center',
-    backgroundColor: colors.bg2, borderWidth: 0.5, borderColor: colors.border, borderRadius: Radius.sm,
-  },
-  speedBtnLabel: { fontSize: Typography.xs, fontWeight: Typography.medium, color: colors.textSecondary },
+    dpad: { gap: responsive.isDesktop ? 8 : 6 },
+    dpadRow: { flexDirection: 'row', justifyContent: 'center', gap: responsive.isDesktop ? 8 : 6 },
+    dpadBtn: {
+      width: dpadBtnSize, 
+      height: dpadBtnSize, 
+      borderRadius: Radius.md,
+      backgroundColor: colors.bg2, 
+      borderWidth: 0.5, 
+      borderColor: colors.border,
+      alignItems: 'center', 
+      justifyContent: 'center',
+    },
 
-  cmdGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  cmdBtn: { width: '47%', flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border, borderRadius: Radius.md },
-  cmdIcon: { width: 32, height: 32, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
-  cmdLabel: { flex: 1, fontSize: Typography.xs, fontWeight: Typography.medium, color: colors.textSecondary },
+    speedSliderWrap: { width: '100%', gap: space.sm },
+    speedSliderLabel: { fontSize: typo.xs, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase' },
+    speedBtns: { flexDirection: 'row', gap: space.sm },
+    speedBtn: {
+      flex: 1, 
+      paddingVertical: responsive.isDesktop ? space.sm : 8, 
+      alignItems: 'center',
+      backgroundColor: colors.bg2, 
+      borderWidth: 0.5, 
+      borderColor: colors.border, 
+      borderRadius: Radius.sm,
+    },
+    speedBtnLabel: { fontSize: typo.xs, fontWeight: Typography.medium, color: colors.textSecondary },
 
-  telemetryCard: { backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border, borderRadius: Radius.lg, overflow: 'hidden' },
-  telRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: Spacing.md, paddingVertical: 11,
-    borderBottomWidth: 0.5, borderBottomColor: colors.border,
-  },
-  telLabel: { fontSize: Typography.sm, color: colors.textSecondary },
-  telValue: { fontSize: Typography.sm, fontWeight: Typography.medium },
-});
+    cmdGrid: { 
+      flexDirection: 'row', 
+      flexWrap: 'wrap', 
+      gap: space.sm 
+    },
+    cmdBtn: { 
+      width: responsive.isDesktop ? '48%' : '47%', 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: space.sm, 
+      padding: space.md, 
+      backgroundColor: colors.bg1, 
+      borderWidth: 0.5, 
+      borderColor: colors.border, 
+      borderRadius: Radius.md 
+    },
+    cmdIcon: { 
+      width: responsive.isDesktop ? 36 : 32, 
+      height: responsive.isDesktop ? 36 : 32, 
+      borderRadius: Radius.sm, 
+      alignItems: 'center', 
+      justifyContent: 'center' 
+    },
+    cmdLabel: { flex: 1, fontSize: typo.xs, fontWeight: Typography.medium, color: colors.textSecondary },
+
+    telemetryCard: { 
+      backgroundColor: colors.bg1, 
+      borderWidth: 0.5, 
+      borderColor: colors.border, 
+      borderRadius: Radius.lg, 
+      overflow: 'hidden' 
+    },
+    telRow: {
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      paddingHorizontal: space.md, 
+      paddingVertical: responsive.isDesktop ? space.md : 11,
+      borderBottomWidth: 0.5, 
+      borderBottomColor: colors.border,
+    },
+    telLabel: { fontSize: typo.sm, color: colors.textSecondary },
+    telValue: { fontSize: typo.sm, fontWeight: Typography.medium },
+  });
+};

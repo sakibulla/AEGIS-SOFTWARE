@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Typography, Spacing, Radius } from '../constants/theme';
+import { Typography, Spacing, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { SectionLabel, MeshBadge } from '../components/SwarmUI';
 import { BOTS, MAP_ROOMS } from '../constants/mockData';
-
-const { width } = Dimensions.get('window');
-const MAP_W = width - Spacing.lg * 2;
+import { useResponsive } from '../utils/responsive';
 
 export default function MapScreen() {
   const [selectedBot, setSelectedBot] = useState(null);
   const { colors } = useTheme();
-  const styles = getStyles(colors);
+  const responsive = useResponsive();
+  const styles = getStyles(colors, responsive);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -73,9 +72,9 @@ export default function MapScreen() {
         <View style={styles.section}>
           <SectionLabel>Map Coverage</SectionLabel>
           <View style={styles.statRow}>
-            <MapStat label="Coverage" value="78%" colors={colors} />
-            <MapStat label="Rooms" value={MAP_ROOMS.length} colors={colors} />
-            <MapStat label="Status" value="Active" colors={colors} />
+            <MapStat label="Coverage" value="78%" colors={colors} responsive={responsive} />
+            <MapStat label="Rooms" value={MAP_ROOMS.length} colors={colors} responsive={responsive} />
+            <MapStat label="Status" value="Active" colors={colors} responsive={responsive} />
           </View>
         </View>
       </ScrollView>
@@ -83,71 +82,87 @@ export default function MapScreen() {
   );
 }
 
-function MapStat({ label, value, colors }) {
+function MapStat({ label, value, colors, responsive }) {
   return (
-    <View style={[getStyles(colors).statCard, { backgroundColor: colors.bg1 }]}>
-      <Text style={[getStyles(colors).statValue, { color: colors.cyan }]}>{value}</Text>
-      <Text style={getStyles(colors).statLabel}>{label}</Text>
+    <View style={[getStyles(colors, responsive).statCard, { backgroundColor: colors.bg1 }]}>
+      <Text style={[getStyles(colors, responsive).statValue, { color: colors.cyan }]}>{value}</Text>
+      <Text style={getStyles(colors, responsive).statLabel}>{label}</Text>
     </View>
   );
 }
 
-const getStyles = (colors) =>
-  StyleSheet.create({
+const getStyles = (colors, responsive) => {
+  const typo = getResponsiveTypography(responsive.deviceType);
+  const space = getResponsiveSpacing(responsive.deviceType);
+
+  const mapHeight = responsive.isDesktop ? 500 : responsive.isTablet ? 400 : 300;
+
+  return StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.bg0 },
     header: {
-      flexDirection: 'row',
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.md,
+      alignItems: responsive.isSmallDevice ? 'flex-start' : 'center',
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md,
       borderBottomWidth: 0.5,
       borderBottomColor: colors.border,
+      gap: responsive.isSmallDevice ? space.sm : 0,
     },
     headerTitle: {
-      fontSize: Typography.xl,
+      fontSize: typo.xl,
       fontWeight: Typography.bold,
       color: colors.textPrimary,
       letterSpacing: 1,
     },
     scroll: { flex: 1 },
-    content: { paddingBottom: 32 },
+    content: { 
+      paddingBottom: space.xxl,
+      maxWidth: responsive.isDesktop ? 1200 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
 
     mapContainer: {
-      paddingHorizontal: Spacing.lg,
-      paddingTop: Spacing.xl,
-      paddingBottom: Spacing.lg,
+      paddingHorizontal: space.lg,
+      paddingTop: space.xl,
+      paddingBottom: space.lg,
     },
     mapPlaceholder: {
       backgroundColor: colors.bg1,
       borderWidth: 0.5,
       borderColor: colors.border,
       borderRadius: Radius.lg,
-      paddingVertical: 48,
+      paddingVertical: mapHeight / 3,
       alignItems: 'center',
       justifyContent: 'center',
+      height: mapHeight,
     },
     mapPlaceholderText: {
-      fontSize: Typography.md,
+      fontSize: typo.md,
       fontWeight: Typography.bold,
       color: colors.textPrimary,
-      marginTop: Spacing.md,
+      marginTop: space.md,
     },
     mapPlaceholderSub: {
-      fontSize: Typography.sm,
+      fontSize: typo.sm,
       color: colors.textSecondary,
-      marginTop: Spacing.sm,
+      marginTop: space.sm,
     },
 
-    section: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl },
+    section: { paddingHorizontal: space.lg, paddingTop: space.xl },
 
-    botList: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+    botList: { 
+      flexDirection: 'row', 
+      flexWrap: 'wrap', 
+      gap: space.sm 
+    },
     botButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: Spacing.sm,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.sm,
+      gap: space.sm,
+      paddingHorizontal: responsive.isDesktop ? space.lg : space.md,
+      paddingVertical: responsive.isDesktop ? space.md : space.sm,
       backgroundColor: colors.bg1,
       borderWidth: 0.5,
       borderColor: colors.border,
@@ -163,28 +178,33 @@ const getStyles = (colors) =>
       borderRadius: Radius.full,
     },
     botButtonLabel: {
-      fontSize: Typography.sm,
+      fontSize: typo.sm,
       fontWeight: Typography.medium,
       color: colors.textSecondary,
     },
 
-    statRow: { flexDirection: 'row', gap: Spacing.sm },
+    statRow: { 
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row', 
+      gap: space.sm 
+    },
     statCard: {
-      flex: 1,
+      flex: responsive.isSmallDevice ? 0 : 1,
+      width: responsive.isSmallDevice ? '100%' : 'auto',
       borderWidth: 0.5,
       borderColor: colors.border,
       borderRadius: Radius.md,
-      padding: Spacing.md,
+      padding: responsive.isDesktop ? space.lg : space.md,
       alignItems: 'center',
     },
     statValue: {
-      fontSize: Typography.lg,
+      fontSize: typo.lg,
       fontWeight: Typography.bold,
     },
     statLabel: {
-      fontSize: Typography.xs,
+      fontSize: typo.xs,
       color: colors.textMuted,
       textAlign: 'center',
-      marginTop: Spacing.sm,
+      marginTop: space.sm,
     },
   });
+};

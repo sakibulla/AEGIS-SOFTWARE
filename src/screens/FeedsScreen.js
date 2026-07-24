@@ -11,13 +11,15 @@ import {
   RefreshControl,
   Image,
 } from 'react-native';
-import { Typography, Spacing, Radius, Shadows } from '../constants/theme';
+import { Typography, Spacing, Radius, Shadows, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { VIDEO_FEEDS, BOTS } from '../constants/mockData';
 import { useStreamUrls } from '../hooks/useStreamUrls';
+import { useResponsive } from '../utils/responsive';
 
 export default function FeedsScreen() {
   const { colors } = useTheme();
+  const responsive = useResponsive();
   const { urls, setUrl, loading: urlsLoading, detectionsUrlFor } = useStreamUrls();
   const [expandedBot, setExpandedBot] = useState(null);
   const [urlModalVisible, setUrlModalVisible] = useState(false);
@@ -26,7 +28,7 @@ export default function FeedsScreen() {
   const [detectionLoading, setDetectionLoading] = useState({});
   const [refreshing, setRefreshing] = useState(false);
 
-  const styles = getStyles(colors);
+  const styles = getStyles(colors, responsive);
 
   // Poll detections every 1s when a feed is expanded
   useEffect(() => {
@@ -318,318 +320,339 @@ export default function FeedsScreen() {
   );
 }
 
-const getStyles = (colors) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg0,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.bg0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: colors.textSecondary,
-    marginTop: Spacing.md,
-    fontSize: Typography.base,
-  },
+const getStyles = (colors, responsive) => {
+  const typo = getResponsiveTypography(responsive.deviceType);
+  const space = getResponsiveSpacing(responsive.deviceType);
+  
+  // Feed height based on device
+  const feedHeight = responsive.isDesktop ? 400 : responsive.isTablet ? 320 : 250;
 
-  // Feed Cards
-  feedCard: {
-    backgroundColor: colors.bg1,
-    borderRadius: Radius.md,
-    marginBottom: Spacing.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Shadows.card,
-  },
-  feedCardExpanded: {
-    borderColor: colors.cyan,
-    borderWidth: 2,
-  },
-  feedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    backgroundColor: colors.bg2,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  feedHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  feedName: {
-    fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: colors.textPrimary,
-  },
-  liveBadge: {
-    backgroundColor: colors.greenDim,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.sm,
-  },
-  liveBadgeText: {
-    fontSize: Typography.xs,
-    color: colors.green,
-    fontWeight: Typography.bold,
-  },
-  offlineBadge: {
-    backgroundColor: colors.redDim,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.sm,
-  },
-  offlineBadgeText: {
-    fontSize: Typography.xs,
-    color: colors.red,
-    fontWeight: Typography.bold,
-  },
-  settingsButton: {
-    padding: Spacing.sm,
-  },
-  settingsIcon: {
-    fontSize: Typography.lg,
-  },
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg0,
+      paddingHorizontal: space.md,
+      paddingVertical: space.md,
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.bg0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      color: colors.textSecondary,
+      marginTop: space.md,
+      fontSize: typo.base,
+    },
 
-  // Feed Content
-  feedContent: {
-    height: 250,
-    backgroundColor: '#000',
-    overflow: 'hidden',
-  },
-  feedImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  loadingOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.bg2,
-  },
-  placeholderFeed: {
-    height: 250,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.bg2,
-  },
-  placeholderIcon: {
-    fontSize: 48,
-    marginBottom: Spacing.md,
-  },
-  placeholderText: {
-    fontSize: Typography.md,
-    color: colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  placeholderSubtext: {
-    fontSize: Typography.sm,
-    color: colors.textMuted,
-  },
+    // Feed Cards
+    feedCard: {
+      backgroundColor: colors.bg1,
+      borderRadius: Radius.md,
+      marginBottom: space.md,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Shadows.card,
+      maxWidth: responsive.isDesktop ? 900 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
+    feedCardExpanded: {
+      borderColor: colors.cyan,
+      borderWidth: 2,
+    },
+    feedHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: space.md,
+      paddingVertical: space.md,
+      backgroundColor: colors.bg2,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    feedHeaderLeft: {
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
+      alignItems: responsive.isSmallDevice ? 'flex-start' : 'center',
+      gap: space.md,
+    },
+    feedName: {
+      fontSize: typo.md,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+    },
+    liveBadge: {
+      backgroundColor: colors.greenDim,
+      paddingHorizontal: space.sm,
+      paddingVertical: space.xs,
+      borderRadius: Radius.sm,
+    },
+    liveBadgeText: {
+      fontSize: typo.xs,
+      color: colors.green,
+      fontWeight: Typography.bold,
+    },
+    offlineBadge: {
+      backgroundColor: colors.redDim,
+      paddingHorizontal: space.sm,
+      paddingVertical: space.xs,
+      borderRadius: Radius.sm,
+    },
+    offlineBadgeText: {
+      fontSize: typo.xs,
+      color: colors.red,
+      fontWeight: Typography.bold,
+    },
+    settingsButton: {
+      padding: space.sm,
+    },
+    settingsIcon: {
+      fontSize: typo.lg,
+    },
 
-  // Expanded Section
-  expandedSection: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.bg1,
-  },
-  controlButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: Spacing.md,
-  },
-  controlButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    backgroundColor: colors.bg2,
-    borderRadius: Radius.sm,
-    borderWidth: 1,
-    borderColor: colors.cyan,
-  },
-  controlButtonText: {
-    fontSize: Typography.sm,
-    color: colors.cyan,
-    fontWeight: Typography.bold,
-  },
+    // Feed Content
+    feedContent: {
+      height: feedHeight,
+      backgroundColor: '#000',
+      overflow: 'hidden',
+    },
+    feedImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    loadingOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.bg2,
+    },
+    placeholderFeed: {
+      height: feedHeight,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.bg2,
+    },
+    placeholderIcon: {
+      fontSize: responsive.isDesktop ? 64 : 48,
+      marginBottom: space.md,
+    },
+    placeholderText: {
+      fontSize: typo.md,
+      color: colors.textSecondary,
+      marginBottom: space.xs,
+    },
+    placeholderSubtext: {
+      fontSize: typo.sm,
+      color: colors.textMuted,
+    },
 
-  // Detections
-  detectionsSection: {
-    marginTop: Spacing.md,
-  },
-  detectionsTitle: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.bold,
-    color: colors.textSecondary,
-    marginBottom: Spacing.sm,
-  },
-  detectionChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  detectionChip: {
-    backgroundColor: colors.bg2,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.cyan,
-  },
-  detectionLabel: {
-    fontSize: Typography.xs,
-    color: colors.cyan,
-    fontWeight: Typography.medium,
-  },
-  noDetectionsText: {
-    fontSize: Typography.sm,
-    color: colors.textMuted,
-  },
+    // Expanded Section
+    expandedSection: {
+      paddingHorizontal: space.md,
+      paddingVertical: space.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.bg1,
+    },
+    controlButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: space.md,
+      flexWrap: 'wrap',
+      gap: space.sm,
+    },
+    controlButton: {
+      paddingHorizontal: space.md,
+      paddingVertical: space.sm,
+      backgroundColor: colors.bg2,
+      borderRadius: Radius.sm,
+      borderWidth: 1,
+      borderColor: colors.cyan,
+    },
+    controlButtonText: {
+      fontSize: typo.sm,
+      color: colors.cyan,
+      fontWeight: Typography.bold,
+    },
 
-  // Status Section
-  statusSection: {
-    marginVertical: Spacing.lg,
-    paddingHorizontal: Spacing.md,
-  },
-  statusTitle: {
-    fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: colors.textPrimary,
-    marginBottom: Spacing.md,
-  },
-  statusItem: {
-    backgroundColor: colors.bg1,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  statusLabel: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.bold,
-    color: colors.textPrimary,
-    marginBottom: Spacing.xs,
-  },
-  statusUrl: {
-    fontSize: Typography.xs,
-    color: colors.textMuted,
-    marginBottom: Spacing.sm,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.sm,
-  },
-  setBadge: {
-    backgroundColor: colors.greenDim,
-  },
-  emptyBadge: {
-    backgroundColor: colors.amberDim,
-  },
-  statusBadgeText: {
-    fontSize: Typography.xs,
-    fontWeight: Typography.bold,
-    color: colors.textPrimary,
-  },
+    // Detections
+    detectionsSection: {
+      marginTop: space.md,
+    },
+    detectionsTitle: {
+      fontSize: typo.sm,
+      fontWeight: Typography.bold,
+      color: colors.textSecondary,
+      marginBottom: space.sm,
+    },
+    detectionChips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: space.sm,
+    },
+    detectionChip: {
+      backgroundColor: colors.bg2,
+      borderRadius: Radius.md,
+      paddingHorizontal: space.md,
+      paddingVertical: space.xs,
+      borderWidth: 1,
+      borderColor: colors.cyan,
+    },
+    detectionLabel: {
+      fontSize: typo.xs,
+      color: colors.cyan,
+      fontWeight: Typography.medium,
+    },
+    noDetectionsText: {
+      fontSize: typo.sm,
+      color: colors.textMuted,
+    },
 
-  // Info Card
-  infoCard: {
-    backgroundColor: colors.bg2,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginVertical: Spacing.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.cyan,
-  },
-  infoTitle: {
-    fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: colors.cyan,
-    marginBottom: Spacing.sm,
-  },
-  infoText: {
-    fontSize: Typography.sm,
-    color: colors.textSecondary,
-    marginBottom: Spacing.md,
-  },
-  infoStep: {
-    fontSize: Typography.xs,
-    color: colors.textMuted,
-    marginBottom: Spacing.xs,
-  },
+    // Status Section
+    statusSection: {
+      marginVertical: space.lg,
+      paddingHorizontal: space.md,
+      maxWidth: responsive.isDesktop ? 900 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
+    statusTitle: {
+      fontSize: typo.md,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+      marginBottom: space.md,
+    },
+    statusItem: {
+      backgroundColor: colors.bg1,
+      borderRadius: Radius.md,
+      padding: space.md,
+      marginBottom: space.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statusLabel: {
+      fontSize: typo.sm,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+      marginBottom: space.xs,
+    },
+    statusUrl: {
+      fontSize: typo.xs,
+      color: colors.textMuted,
+      marginBottom: space.sm,
+    },
+    statusBadge: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: space.md,
+      paddingVertical: space.xs,
+      borderRadius: Radius.sm,
+    },
+    setBadge: {
+      backgroundColor: colors.greenDim,
+    },
+    emptyBadge: {
+      backgroundColor: colors.amberDim,
+    },
+    statusBadgeText: {
+      fontSize: typo.xs,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+    },
 
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: colors.bg1,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    width: '80%',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  modalTitle: {
-    fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: colors.textPrimary,
-    marginBottom: Spacing.md,
-  },
-  modalInput: {
-    backgroundColor: colors.bg3,
-    borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    fontSize: Typography.sm,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: Spacing.lg,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: Spacing.md,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelButton: {
-    backgroundColor: colors.bg2,
-  },
-  saveButton: {
-    backgroundColor: colors.cyanFaint,
-    borderColor: colors.cyan,
-  },
-  modalButtonText: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.bold,
-    color: colors.textSecondary,
-  },
-  saveButtonText: {
-    color: colors.cyan,
-  },
-});
+    // Info Card
+    infoCard: {
+      backgroundColor: colors.bg2,
+      borderRadius: Radius.md,
+      padding: space.md,
+      marginVertical: space.lg,
+      borderLeftWidth: 4,
+      borderLeftColor: colors.cyan,
+      maxWidth: responsive.isDesktop ? 900 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
+    infoTitle: {
+      fontSize: typo.md,
+      fontWeight: Typography.bold,
+      color: colors.cyan,
+      marginBottom: space.sm,
+    },
+    infoText: {
+      fontSize: typo.sm,
+      color: colors.textSecondary,
+      marginBottom: space.md,
+    },
+    infoStep: {
+      fontSize: typo.xs,
+      color: colors.textMuted,
+      marginBottom: space.xs,
+    },
+
+    // Modal
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: space.md,
+    },
+    modalContent: {
+      backgroundColor: colors.bg1,
+      borderRadius: Radius.lg,
+      padding: space.lg,
+      width: responsive.isDesktop ? 500 : responsive.isTablet ? 400 : '100%',
+      maxWidth: '90%',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    modalTitle: {
+      fontSize: typo.md,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+      marginBottom: space.md,
+    },
+    modalInput: {
+      backgroundColor: colors.bg3,
+      borderRadius: Radius.sm,
+      paddingHorizontal: space.md,
+      paddingVertical: space.md,
+      fontSize: typo.sm,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: space.lg,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: space.md,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: space.md,
+      borderRadius: Radius.sm,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cancelButton: {
+      backgroundColor: colors.bg2,
+    },
+    saveButton: {
+      backgroundColor: colors.cyanFaint,
+      borderColor: colors.cyan,
+    },
+    modalButtonText: {
+      fontSize: typo.sm,
+      fontWeight: Typography.bold,
+      color: colors.textSecondary,
+    },
+    saveButtonText: {
+      color: colors.cyan,
+    },
+  });
+};

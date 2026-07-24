@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Typography, Spacing, Radius } from '../constants/theme';
+import { Typography, Spacing, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import {
   BotCard, AlertBanner, IncidentRow, SectionLabel, MeshBadge,
 } from '../components/SwarmUI';
 import { BOTS, ALERTS, INCIDENTS } from '../constants/mockData';
-
-const { width } = Dimensions.get('window');
+import { useResponsive, getGridColumns } from '../utils/responsive';
 
 export default function DashboardScreen({ navigation }) {
   const [mode, setMode] = useState('autonomous');
   const { colors, isDarkMode, toggleTheme } = useTheme();
+  const responsive = useResponsive();
 
-  const styles = getStyles(colors);
+  const styles = getStyles(colors, responsive);
 
   const onlineCount = BOTS.filter(b => b.status === 'online').length;
   const alertCount  = BOTS.filter(b => b.status === 'alert').length;
@@ -67,9 +66,9 @@ export default function DashboardScreen({ navigation }) {
         {/* ── Swarm Stat Cards ── */}
         <View style={styles.section}>
           <View style={styles.statRow}>
-            <StatCard label="Bots online"   value={`${onlineCount}/3`} color={colors.green} icon="hardware-chip" />
-            <StatCard label="Active alerts" value={alertCount}         color={colors.amber}  icon="warning" />
-            <StatCard label="Map coverage"  value="78%"               color={colors.cyan}   icon="map" />
+            <StatCard label="Bots online"   value={`${onlineCount}/3`} color={colors.green} icon="hardware-chip" responsive={responsive} />
+            <StatCard label="Active alerts" value={alertCount}         color={colors.amber}  icon="warning" responsive={responsive} />
+            <StatCard label="Map coverage"  value="78%"               color={colors.cyan}   icon="map" responsive={responsive} />
           </View>
         </View>
 
@@ -82,6 +81,7 @@ export default function DashboardScreen({ navigation }) {
                 key={bot.id}
                 bot={bot}
                 onPress={() => navigation.navigate('BotDetail', { botId: bot.id })}
+                responsive={responsive}
               />
             ))}
           </View>
@@ -132,13 +132,14 @@ export default function DashboardScreen({ navigation }) {
 
 // ─── Stat Card ────────────────────────────────────────────────────
 
-function StatCard({ label, value, color, icon }) {
+function StatCard({ label, value, color, icon, responsive }) {
   const { colors } = useTheme();
-  const styles = getStyles(colors);
+  const styles = getStyles(colors, responsive);
+  const iconSize = responsive.isDesktop ? 20 : responsive.isTablet ? 18 : 16;
 
   return (
     <View style={styles.statCard}>
-      <Ionicons name={icon} size={16} color={color} style={{ marginBottom: 4 }} />
+      <Ionicons name={icon} size={iconSize} color={color} style={{ marginBottom: 4 }} />
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -148,7 +149,9 @@ function StatCard({ label, value, color, icon }) {
 // ─── Mode Button ─────────────────────────────────────────────────
 
 function ModeBtn({ icon, label, active, onPress, colors }) {
-  const styles = getStyles(colors);
+  const responsive = useResponsive();
+  const styles = getStyles(colors, responsive);
+  const iconSize = responsive.isDesktop ? 24 : 20;
 
   return (
     <TouchableOpacity
@@ -156,7 +159,7 @@ function ModeBtn({ icon, label, active, onPress, colors }) {
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Ionicons name={icon} size={20} color={active ? colors.cyan : colors.textSecondary} />
+      <Ionicons name={icon} size={iconSize} color={active ? colors.cyan : colors.textSecondary} />
       <Text style={[styles.modeBtnLabel, active && { color: colors.cyan }]}>{label}</Text>
     </TouchableOpacity>
   );
@@ -164,64 +167,106 @@ function ModeBtn({ icon, label, active, onPress, colors }) {
 
 // ─── Styles ──────────────────────────────────────────────────────
 
-const getStyles = (colors) => StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: colors.bg0 },
-  scroll:  { flex: 1 },
-  content: { paddingBottom: 32 },
+const getStyles = (colors, responsive) => {
+  const typo = getResponsiveTypography(responsive.deviceType);
+  const space = getResponsiveSpacing(responsive.deviceType);
+  const columns = getGridColumns(responsive.deviceType, { mobile: 1, tablet: 2, desktop: 3 });
 
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border,
-  },
-  appTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: colors.textPrimary, letterSpacing: 1 },
-  topBarSub: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-  topBarSubText: { fontSize: Typography.xs, color: colors.textMuted },
-  topBarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  themeBtn: { padding: 6 },
-  bellBtn: { padding: 6, position: 'relative' },
-  bellBadge: {
-    position: 'absolute', top: 2, right: 2,
-    backgroundColor: colors.amber, borderRadius: Radius.full,
-    width: 14, height: 14, alignItems: 'center', justifyContent: 'center', zIndex: 1,
-  },
-  bellBadgeText: { fontSize: 9, color: '#000', fontWeight: Typography.bold },
+  return StyleSheet.create({
+    safe:    { flex: 1, backgroundColor: colors.bg0 },
+    scroll:  { flex: 1 },
+    content: { 
+      paddingBottom: space.xxl,
+      maxWidth: responsive.isDesktop ? 1400 : '100%',
+      alignSelf: 'center',
+      width: '100%',
+    },
 
-  section: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl },
+    topBar: {
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
+      justifyContent: 'space-between',
+      alignItems: responsive.isSmallDevice ? 'flex-start' : 'center',
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.border,
+      gap: responsive.isSmallDevice ? space.sm : 0,
+    },
+    appTitle: { fontSize: typo.xl, fontWeight: Typography.bold, color: colors.textPrimary, letterSpacing: 1 },
+    topBarSub: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
+    topBarSubText: { fontSize: typo.xs, color: colors.textMuted },
+    topBarActions: { 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: space.sm,
+      alignSelf: responsive.isSmallDevice ? 'flex-end' : 'center',
+    },
+    themeBtn: { padding: space.xs },
+    bellBtn: { padding: space.xs, position: 'relative' },
+    bellBadge: {
+      position: 'absolute', top: 2, right: 2,
+      backgroundColor: colors.amber, borderRadius: Radius.full,
+      width: 14, height: 14, alignItems: 'center', justifyContent: 'center', zIndex: 1,
+    },
+    bellBadgeText: { fontSize: 9, color: '#000', fontWeight: Typography.bold },
 
-  statRow: { flexDirection: 'row', gap: Spacing.sm },
-  statCard: {
-    flex: 1, backgroundColor: colors.bg1,
-    borderWidth: 0.5, borderColor: colors.border,
-    borderRadius: Radius.md, padding: Spacing.md,
-    alignItems: 'center',
-  },
-  statValue: { fontSize: Typography.lg, fontWeight: Typography.bold },
-  statLabel: { fontSize: Typography.xs, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
+    section: { paddingHorizontal: space.lg, paddingTop: space.xl },
 
-  botGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+    statRow: { 
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row', 
+      gap: space.sm 
+    },
+    statCard: {
+      flex: responsive.isSmallDevice ? 0 : 1,
+      width: responsive.isSmallDevice ? '100%' : 'auto',
+      backgroundColor: colors.bg1,
+      borderWidth: 0.5, 
+      borderColor: colors.border,
+      borderRadius: Radius.md, 
+      padding: responsive.isDesktop ? space.lg : space.md,
+      alignItems: 'center',
+    },
+    statValue: { fontSize: typo.lg, fontWeight: Typography.bold },
+    statLabel: { fontSize: typo.xs, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
 
-  modeRow: { flexDirection: 'row', gap: Spacing.sm },
-  modeBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: Spacing.md,
-    backgroundColor: colors.bg1, borderWidth: 0.5, borderColor: colors.border,
-    borderRadius: Radius.md,
-  },
-  modeBtnActive: { backgroundColor: colors.cyanFaint, borderColor: colors.cyanDim },
-  modeBtnLabel: { fontSize: Typography.sm, fontWeight: Typography.medium, color: colors.textSecondary },
+    botGrid: { 
+      flexDirection: 'row', 
+      flexWrap: 'wrap', 
+      gap: space.sm,
+    },
 
-  incidentList: { gap: Spacing.sm },
+    modeRow: { 
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row', 
+      gap: space.sm 
+    },
+    modeBtn: {
+      flex: responsive.isSmallDevice ? 0 : 1,
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      gap: space.sm, 
+      paddingVertical: responsive.isDesktop ? space.lg : space.md,
+      backgroundColor: colors.bg1, 
+      borderWidth: 0.5, 
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+    },
+    modeBtnActive: { backgroundColor: colors.cyanFaint, borderColor: colors.cyanDim },
+    modeBtnLabel: { fontSize: typo.sm, fontWeight: Typography.medium, color: colors.textSecondary },
 
-  sosBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: Spacing.sm, paddingVertical: 14,
-    backgroundColor: colors.redDim, borderWidth: 0.5, borderColor: colors.red + '55',
-    borderRadius: Radius.lg,
-  },
-  sosBtnText: { fontSize: Typography.base, fontWeight: Typography.bold, color: colors.red },
-});
+    incidentList: { gap: space.sm },
+
+    sosBtn: {
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      gap: space.sm, 
+      paddingVertical: responsive.isDesktop ? space.lg : space.md,
+      backgroundColor: colors.redDim, 
+      borderWidth: 0.5, 
+      borderColor: colors.red + '55',
+      borderRadius: Radius.lg,
+    },
+    sosBtnText: { fontSize: typo.base, fontWeight: Typography.bold, color: colors.red },
+  });
+};
