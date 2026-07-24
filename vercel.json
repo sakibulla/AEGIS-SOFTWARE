@@ -1,5 +1,6 @@
 {
-  "buildCommand": "npm install && npx expo export:web",
+  "buildCommand": "bash build.sh",
   "outputDirectory": "dist",
-  "framework": null
+  "framework": null,
+  "installCommand": "npm install"
 }

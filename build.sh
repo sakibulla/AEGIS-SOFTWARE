@@ -1,16 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "Starting Expo web build for Vercel..."
+echo "Starting Expo web build..."
 
-# Ensure expo CLI is available
-if ! command -v expo &> /dev/null; then
-    echo "Installing expo CLI..."
-    npm install -g expo-cli
-fi
+# Install dependencies
+echo "Installing dependencies..."
+npm ci
 
-# Run the export
+# Export for web
 echo "Exporting for web platform..."
-expo export --platform web
+npx expo export --platform web
 
 echo "Build completed successfully!"

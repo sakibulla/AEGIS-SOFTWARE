@@ -48,6 +48,8 @@ export default function AboutScreen({ navigation }) {
       image: require('../../assets/images/team/Ahmed Sadman Sadik.jpg'),
       expertise: 'Model Training, Computer Vision, YOLO',
       contributions: 'Model training for Pathfinder image recognition',
+      github: 'github.com/Sadik00789',
+      linkedin: 'linkedin.com/in/ahmed-sadman-sadik-348533263',
     },
     {
       id: 2,
