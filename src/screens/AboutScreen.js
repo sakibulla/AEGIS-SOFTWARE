@@ -57,6 +57,7 @@ export default function AboutScreen({ navigation }) {
       expertise: 'Model Training, Deep Learning, AI/ML',
       contributions: 'Model training and AI system development',
       github: 'github.com/sakib2004',
+      linkedin: 'linkedin.com/in/md-sakib-sarker-55b3b3202',
     },
     {
       id: 3,

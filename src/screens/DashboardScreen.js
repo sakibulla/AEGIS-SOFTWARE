@@ -45,9 +45,9 @@ export default function DashboardScreen({ navigation }) {
           <TouchableOpacity style={styles.themeBtn} onPress={toggleTheme} activeOpacity={0.7}>
             <Ionicons name={isDarkMode ? 'moon' : 'sunny'} size={22} color={colors.textSecondary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.bellBtn} onPress={() => navigation.navigate('Alerts')}>
-            {alertCount > 0 && <View style={styles.bellBadge}><Text style={styles.bellBadgeText}>{alertCount}</Text></View>}
-            <Ionicons name="notifications" size={22} color={colors.textSecondary} />
+          <TouchableOpacity style={styles.notificationBtn} onPress={() => navigation.navigate('Alerts')} activeOpacity={0.7}>
+            {alertCount > 0 && <View style={styles.notificationBadge}><Text style={styles.notificationBadgeText}>{alertCount}</Text></View>}
+            <Text style={styles.notificationBtnText}>Notifications</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -64,9 +64,14 @@ export default function DashboardScreen({ navigation }) {
           </View>
         )}
 
-        {/* ── Project Video ── */}
+        {/* ── Project Demo Video ── */}
         <View style={styles.section}>
-          <SectionLabel>Project Overview</SectionLabel>
+          <SectionLabel 
+            action={responsive.isDesktop ? "Watch on YouTube →" : undefined}
+            onAction={() => Linking.openURL('https://www.youtube.com/watch?v=Inbc1NvTbIw')}
+          >
+            Project Demo
+          </SectionLabel>
           <ProjectVideo colors={colors} responsive={responsive} />
         </View>
 
@@ -141,11 +146,13 @@ export default function DashboardScreen({ navigation }) {
 
 function ProjectVideo({ colors, responsive }) {
   const [showVideo, setShowVideo] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const styles = getVideoStyles(colors, responsive);
   
-  const videoId = 'x5oWp0QmJTI';
+  const videoId = 'Inbc1NvTbIw';
   const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1`;
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
   const handleOpenYouTube = () => {
     Linking.openURL(youtubeUrl).catch(err => console.error('Failed to open URL:', err));
@@ -154,46 +161,83 @@ function ProjectVideo({ colors, responsive }) {
   if (!showVideo) {
     return (
       <TouchableOpacity style={styles.videoPlaceholder} onPress={() => setShowVideo(true)} activeOpacity={0.8}>
-        <Ionicons name="play-circle" size={64} color={colors.cyan} />
-        <Text style={styles.videoPlaceholderText}>Watch Project Demo</Text>
-        <Text style={styles.videoPlaceholderSub}>A.E.G.I.S. Robot Swarm in Action</Text>
+        <View style={styles.playIconContainer}>
+          <Ionicons name="play-circle" size={80} color={colors.cyan} />
+        </View>
+        <Text style={styles.videoPlaceholderTitle}>A.E.G.I.S. Project Demo</Text>
+        <Text style={styles.videoPlaceholderSub}>Autonomous Emergency Guardian & Intervention Swarm</Text>
+        <View style={styles.videoStats}>
+          <View style={styles.videoStatItem}>
+            <Ionicons name="hardware-chip" size={16} color={colors.green} />
+            <Text style={styles.videoStatText}>3 Bot Swarm</Text>
+          </View>
+          <View style={styles.videoStatItem}>
+            <Ionicons name="videocam" size={16} color={colors.cyan} />
+            <Text style={styles.videoStatText}>Live Demo</Text>
+          </View>
+        </View>
+        <Text style={styles.videoTapToWatch}>Tap to watch video</Text>
       </TouchableOpacity>
     );
   }
 
   return (
     <View style={styles.videoContainer}>
-      {Platform.OS === 'web' ? (
-        <iframe
-          src={embedUrl}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            borderRadius: '10px',
-          }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="AEGIS Project Video"
-        />
-      ) : (
-        <WebView
-          source={{ uri: embedUrl }}
-          style={styles.webview}
-          allowsFullscreenVideo
-          mediaPlaybackRequiresUserAction={false}
-          javaScriptEnabled
-          domStorageEnabled
-        />
-      )}
-      <View style={styles.videoActions}>
-        <TouchableOpacity style={styles.videoActionBtn} onPress={() => setShowVideo(false)}>
-          <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
-          <Text style={styles.videoActionText}>Hide Video</Text>
+      {/* Video Header */}
+      <View style={styles.videoHeader}>
+        <View style={styles.videoHeaderLeft}>
+          <View style={styles.liveIndicator}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>DEMO</Text>
+          </View>
+          <Text style={styles.videoTitle}>Project Showcase</Text>
+        </View>
+        <TouchableOpacity onPress={() => setShowVideo(false)} style={styles.closeBtn}>
+          <Ionicons name="close" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.videoActionBtn} onPress={handleOpenYouTube}>
-          <Ionicons name="open-outline" size={20} color={colors.cyan} />
-          <Text style={[styles.videoActionText, { color: colors.cyan }]}>Open in YouTube</Text>
+      </View>
+
+      {/* Video Player */}
+      <View style={styles.videoPlayerWrapper}>
+        {Platform.OS === 'web' ? (
+          <iframe
+            src={embedUrl}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              backgroundColor: '#000',
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            title="AEGIS Project Demo Video"
+          />
+        ) : (
+          <WebView
+            source={{ uri: embedUrl }}
+            style={styles.webview}
+            allowsFullscreenVideo
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled
+            domStorageEnabled
+            onLoadStart={() => setIsLoading(true)}
+            onLoadEnd={() => setIsLoading(false)}
+          />
+        )}
+      </View>
+
+      {/* Video Footer */}
+      <View style={styles.videoFooter}>
+        <View style={styles.videoInfo}>
+          <Ionicons name="information-circle" size={18} color={colors.cyan} />
+          <Text style={styles.videoInfoText}>
+            Watch the A.E.G.I.S. robot swarm navigate, detect, and respond autonomously
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.youtubeBtn} onPress={handleOpenYouTube} activeOpacity={0.7}>
+          <Ionicons name="logo-youtube" size={20} color="#FF0000" />
+          <Text style={styles.youtubeBtnText}>Watch on YouTube</Text>
+          <Ionicons name="open-outline" size={16} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -204,64 +248,202 @@ const getVideoStyles = (colors, responsive) => {
   const typo = getResponsiveTypography(responsive.deviceType);
   const space = getResponsiveSpacing(responsive.deviceType);
   
-  const videoHeight = responsive.isDesktop ? 500 : responsive.isTablet ? 400 : 250;
+  // Better aspect ratio for video (16:9)
+  const videoHeight = responsive.isDesktop ? 540 : responsive.isTablet ? 432 : 220;
 
   return StyleSheet.create({
     videoContainer: {
       backgroundColor: colors.bg1,
-      borderWidth: 0.5,
-      borderColor: colors.border,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
       borderRadius: Radius.lg,
       overflow: 'hidden',
+      ...Platform.select({
+        web: {
+          boxShadow: `0 4px 20px ${colors.bg0}80`,
+        },
+        default: {
+          shadowColor: colors.bg0,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+        },
+      }),
     },
-    webview: {
-      height: videoHeight,
-      backgroundColor: '#000',
-    },
-    videoActions: {
-      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
+    
+    videoHeader: {
+      flexDirection: 'row',
       justifyContent: 'space-between',
+      alignItems: 'center',
       padding: space.md,
-      gap: space.sm,
       backgroundColor: colors.bg2,
-      borderTopWidth: 0.5,
-      borderTopColor: colors.border,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
-    videoActionBtn: {
+    videoHeaderLeft: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space.sm,
-      paddingVertical: space.sm,
-      paddingHorizontal: space.md,
-      backgroundColor: colors.bg1,
-      borderWidth: 0.5,
-      borderColor: colors.border,
-      borderRadius: Radius.md,
-      flex: responsive.isSmallDevice ? 0 : 1,
+      gap: space.md,
+      flex: 1,
     },
-    videoActionText: {
+    liveIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: colors.cyanFaint,
+      paddingHorizontal: space.sm,
+      paddingVertical: 4,
+      borderRadius: Radius.full,
+      borderWidth: 1,
+      borderColor: colors.cyanDim,
+    },
+    liveDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.cyan,
+    },
+    liveText: {
+      fontSize: typo.xs,
+      fontWeight: Typography.bold,
+      color: colors.cyan,
+      letterSpacing: 0.5,
+    },
+    videoTitle: {
       fontSize: typo.sm,
       fontWeight: Typography.medium,
-      color: colors.textSecondary,
+      color: colors.textPrimary,
     },
+    closeBtn: {
+      padding: space.xs,
+      borderRadius: Radius.md,
+      backgroundColor: colors.bg1,
+    },
+
+    videoPlayerWrapper: {
+      height: videoHeight,
+      backgroundColor: '#000',
+      position: 'relative',
+    },
+    webview: {
+      flex: 1,
+      backgroundColor: '#000',
+    },
+
+    videoFooter: {
+      padding: space.md,
+      backgroundColor: colors.bg2,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: space.md,
+    },
+    videoInfo: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: space.sm,
+      paddingVertical: space.xs,
+    },
+    videoInfoText: {
+      flex: 1,
+      fontSize: typo.xs,
+      color: colors.textSecondary,
+      lineHeight: typo.xs * 1.5,
+    },
+    youtubeBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: space.sm,
+      paddingVertical: space.md,
+      paddingHorizontal: space.lg,
+      backgroundColor: colors.bg1,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: Radius.md,
+    },
+    youtubeBtnText: {
+      fontSize: typo.sm,
+      fontWeight: Typography.bold,
+      color: colors.textPrimary,
+    },
+
+    // Placeholder styles
     videoPlaceholder: {
       height: videoHeight,
       backgroundColor: colors.bg1,
-      borderWidth: 0.5,
-      borderColor: colors.border,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
       borderRadius: Radius.lg,
       alignItems: 'center',
       justifyContent: 'center',
       gap: space.md,
+      padding: space.xl,
+      ...Platform.select({
+        web: {
+          boxShadow: `0 4px 20px ${colors.bg0}80`,
+        },
+        default: {
+          shadowColor: colors.bg0,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+        },
+      }),
     },
-    videoPlaceholderText: {
-      fontSize: typo.lg,
+    playIconContainer: {
+      width: responsive.isDesktop ? 100 : 80,
+      height: responsive.isDesktop ? 100 : 80,
+      borderRadius: responsive.isDesktop ? 50 : 40,
+      backgroundColor: colors.cyanFaint,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: colors.cyan,
+    },
+    videoPlaceholderTitle: {
+      fontSize: responsive.isDesktop ? typo.xl : typo.lg,
       fontWeight: Typography.bold,
       color: colors.textPrimary,
+      textAlign: 'center',
+      marginTop: space.sm,
     },
     videoPlaceholderSub: {
       fontSize: typo.sm,
       color: colors.textSecondary,
+      textAlign: 'center',
+      maxWidth: responsive.isDesktop ? 400 : 280,
+    },
+    videoStats: {
+      flexDirection: 'row',
+      gap: space.lg,
+      marginTop: space.sm,
+    },
+    videoStatItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.xs,
+      paddingHorizontal: space.md,
+      paddingVertical: space.xs,
+      backgroundColor: colors.bg2,
+      borderRadius: Radius.full,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    videoStatText: {
+      fontSize: typo.xs,
+      fontWeight: Typography.medium,
+      color: colors.textSecondary,
+    },
+    videoTapToWatch: {
+      fontSize: typo.xs,
+      color: colors.cyan,
+      textAlign: 'center',
+      marginTop: space.md,
+      fontWeight: Typography.bold,
+      letterSpacing: 0.5,
+      textTransform: 'uppercase',
     },
   });
 };
@@ -338,13 +520,40 @@ const getStyles = (colors, responsive) => {
       alignSelf: responsive.isSmallDevice ? 'flex-end' : 'center',
     },
     themeBtn: { padding: space.xs },
-    bellBtn: { padding: space.xs, position: 'relative' },
-    bellBadge: {
-      position: 'absolute', top: 2, right: 2,
-      backgroundColor: colors.amber, borderRadius: Radius.full,
-      width: 14, height: 14, alignItems: 'center', justifyContent: 'center', zIndex: 1,
+    notificationBtn: { 
+      paddingHorizontal: space.md,
+      paddingVertical: space.sm,
+      backgroundColor: colors.bg1,
+      borderRadius: Radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      position: 'relative',
     },
-    bellBadgeText: { fontSize: 9, color: '#000', fontWeight: Typography.bold },
+    notificationBtnText: {
+      fontSize: typo.sm,
+      fontWeight: Typography.medium,
+      color: colors.textPrimary,
+    },
+    notificationBadge: {
+      position: 'absolute', 
+      top: -6, 
+      right: -6,
+      backgroundColor: colors.amber, 
+      borderRadius: Radius.full,
+      minWidth: 18, 
+      height: 18, 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      paddingHorizontal: 5,
+      zIndex: 1,
+      borderWidth: 2,
+      borderColor: colors.bg0,
+    },
+    notificationBadgeText: { 
+      fontSize: 10, 
+      color: '#000', 
+      fontWeight: Typography.bold 
+    },
 
     section: { paddingHorizontal: space.lg, paddingTop: space.xl },
 
