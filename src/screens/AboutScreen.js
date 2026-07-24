@@ -99,6 +99,7 @@ export default function AboutScreen({ navigation }) {
       expertise: 'Node.js, API Development, Documentation',
       contributions: 'Backend development and research paper work',
       github: 'github.com/ZahidRana',
+      linkedin: 'linkedin.com/in/zahid-rana-630244154',
     },
   ];
 
