@@ -6,6 +6,7 @@ yarn-error.log
 # Build output (excluded)
 web-build/
 build/
+dist/
 
 # Expo
 .expo/
