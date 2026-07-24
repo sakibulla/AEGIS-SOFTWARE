@@ -25,7 +25,6 @@
 - [👥 Team](#-team)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
-- [📧 Contact](#-contact)
 
 ---
 
@@ -128,15 +127,6 @@ This is an academic research project. If you're interested in collaborating or h
 ## 📄 License
 
 This project was developed as part of an undergraduate capstone project at North South University. Please contact the team for licensing information.
-
-## 📧 Contact
-
-**North South University**  
-Department of Electrical and Computer Engineering (ECE)  
-Dhaka, Bangladesh
-
-**Supervisor:** Dr. Shahnewaz Siddique  
-Associate Professor, Department of ECE
 
 ---
 
