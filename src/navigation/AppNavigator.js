@@ -10,6 +10,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import MapScreen       from '../screens/MapScreen';
 import FeedsScreen     from '../screens/FeedsScreen';
 import ControlScreen   from '../screens/ControlScreen';
+import AboutScreen     from '../screens/AboutScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,7 @@ const TABS = [
   { name: 'Map',       component: MapScreen,        icon: 'map-outline',    iconActive: 'map'         },
   { name: 'Feeds',     component: FeedsScreen,      icon: 'videocam-outline', iconActive: 'videocam'  },
   { name: 'Control',   component: ControlScreen,    icon: 'game-controller-outline', iconActive: 'game-controller' },
+  { name: 'About',     component: AboutScreen,      icon: 'information-circle-outline', iconActive: 'information-circle' },
 ];
 
 export default function AppNavigator() {
