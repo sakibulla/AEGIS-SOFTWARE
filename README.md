@@ -3,7 +3,47 @@
 
 *A low-cost, COTS-based swarm of ground robots that responds to indoor emergencies — mapping the space, checking on people, and detecting hazards — so help doesn't have to wait for a human to arrive first.*
 
-📺 **Project overview video:** [Watch on YouTube](https://www.youtube.com/watch?v=Inbc1NvTbIw)
+📺 **Project overview video:** [Watch on YouTube](https://www.youtube.com/watch?v=Inbc1NvTbIw)  
+🌐 **Live Dashboard Demo:** [https://aegis-software-six.vercel.app](https://aegis-software-six.vercel.app)
+
+![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Web-blue)
+![React Native](https://img.shields.io/badge/React%20Native-0.76.9-61DAFB?logo=react)
+![Expo](https://img.shields.io/badge/Expo-52.0.0-000020?logo=expo)
+![License](https://img.shields.io/badge/license-Academic%20Project-orange)
+
+---
+
+## 📋 Table of Contents
+
+- [📸 Screenshots](#-screenshots)
+- [❓ The Problem](#the-problem)
+- [💡 The Solution](#the-solution)
+- [✨ Why It's Different](#why-its-different)
+- [👥 Who It's For](#who-its-for)
+- [🏆 Project Status](#-project-status)
+- [👥 Team](#-team)
+- [📱 Repository Contents](#-repository-contents)
+- [🚀 Quick Start](#-quick-start)
+- [📚 Documentation](#-documentation)
+- [📁 Project Structure](#-project-structure)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [📧 Contact](#-contact)
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+  <p><em>🎬 Check out the <a href="https://aegis-software-six.vercel.app">live demo</a> to see the dashboard in action!</em></p>
+</div>
+
+The dashboard includes:
+- **Real-time status** monitoring for all 3 bots (Pathfinder, Guardian, Warden)
+- **Live incident feed** with gas leaks, motion detection, and emergency alerts
+- **SLAM map visualization** showing explored areas
+- **Video feeds** from multiple robots
+- **Manual control interface** for emergency override
 
 ---
 
@@ -42,7 +82,7 @@ They talk to each other wirelessly in real time, so if one robot goes offline, t
 - **Small offices & shops** — an affordable alternative to expensive single-purpose security systems
 - **Under-resourced areas** — low-cost, locally buildable emergency response where professional services are slow or limited
 
-## Project Status
+## 🏆 Project Status
 
 Built as a senior design project at the Department of ECE, North South University.
 
@@ -51,7 +91,7 @@ Built as a senior design project at the Department of ECE, North South Universit
 - ⏳ **Phase 3 — Real-World Pilots:** Campus building and residential trials
 - ⏳ **Phase 4 — Release:** Open-source publication or commercial partnership
 
-## Team
+## 👥 Team
 
 **Shahriar Jaman** · **MD Sakib Sarker** · **Ahmed Sadman Sadik** · **Mohammed Bin Ahmed** · **Zahid Hasan Rana** · **Md. Fahmidul Hasan**
 
@@ -59,6 +99,86 @@ Supervised by **Dr. Shahnewaz Siddique**, Associate Professor, Department of Ele
 
 ---
 
-## Repository Contents
+## 📱 Repository Contents
 
-This repo contains the mobile app used as the live command dashboard for the swarm — showing video feeds, maps, alerts, and manual controls. For technical setup and development details, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md)
+This repository contains the **mobile/web application** that serves as the live command dashboard for the A.E.G.I.S. swarm. The app provides real-time monitoring and control of all three robots.
+
+### Key Features
+
+- **📊 Real-time Dashboard** — Live telemetry from all bots (battery, status, location)
+- **🗺️ Live SLAM Mapping** — See the map as Pathfinder builds it
+- **📹 Video Feeds** — Multi-camera view from Guardian and Warden
+- **🚨 Alert System** — Instant notifications for hazards and incidents
+- **🎮 Manual Override** — RC control mode for each robot
+- **📱 Cross-platform** — Runs on iOS, Android, and web browsers
+
+### Tech Stack
+
+- **Framework:** React Native + Expo
+- **Platform Support:** iOS, Android, Web
+- **Communication:** ESP-NOW protocol for robot-to-dashboard communication
+- **Deployment:** Vercel (web version)
+- **UI/UX:** Custom responsive design optimized for emergency response scenarios
+
+### 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/aegis-app.git
+cd aegis-app
+
+# Install dependencies
+npm install
+
+# Run on web
+npm run web
+
+# Run on Android
+npm run android
+
+# Run on iOS
+npm run ios
+```
+
+For detailed setup instructions, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md)
+
+### 📚 Documentation
+
+- [📱 App Setup Guide](docs/APP_SETUP.md) — Installation and development setup
+- [🎨 Responsive Design](docs/RESPONSIVE_DESIGN.md) — UI/UX design specifications
+- [🚀 Quick Start](docs/RESPONSIVE_QUICK_START.md) — Get started quickly
+
+### 📁 Project Structure
+
+```
+aegis-app/
+├── src/
+│   ├── screens/      # Main app screens (Dashboard, Map, Feeds, Control, About)
+│   ├── components/   # Reusable UI components
+│   └── navigation/   # Navigation configuration
+├── assets/           # Images, icons, and media files
+├── android/          # Android native build files
+├── web/              # Web-specific files
+└── docs/             # Documentation
+```
+
+## 🤝 Contributing
+
+This is an academic research project. If you're interested in collaborating or have questions about the system architecture, please reach out to the team or supervisor.
+
+## 📄 License
+
+This project was developed as part of an undergraduate capstone project at North South University. Please contact the team for licensing information.
+
+## 📧 Contact
+
+**North South University**  
+Department of Electrical and Computer Engineering (ECE)  
+Dhaka, Bangladesh
+
+**Supervisor:** Dr. Shahnewaz Siddique  
+Associate Professor, Department of ECE
+
+---
+
+*Built with ❤️ by the A.E.G.I.S. team at North South University*
