@@ -16,6 +16,7 @@
 ## 📋 Table of Contents
 
 - [📸 Screenshots](#-screenshots)
+- [🚀 Features at a Glance](#-features-at-a-glance)
 - [❓ The Problem](#the-problem)
 - [💡 The Solution](#the-solution)
 - [✨ Why It's Different](#why-its-different)
@@ -38,12 +39,37 @@
   <p><em>🎬 Check out the <a href="https://aegis-software-six.vercel.app">live demo</a> to see the dashboard in action!</em></p>
 </div>
 
-The dashboard includes:
-- **Real-time status** monitoring for all 3 bots (Pathfinder, Guardian, Warden)
-- **Live incident feed** with gas leaks, motion detection, and emergency alerts
-- **SLAM map visualization** showing explored areas
-- **Video feeds** from multiple robots
-- **Manual control interface** for emergency override
+### Dashboard Overview
+<img src="assets/images/screenshots/Screenshot 2026-07-24 193458.png" alt="A.E.G.I.S. Dashboard" width="800"/>
+
+*Real-time monitoring of all three robots with live telemetry, battery status, and alert notifications*
+
+### Application Interface
+<img src="assets/images/screenshots/Screenshot 2026-07-24 193507.png" alt="A.E.G.I.S. Interface" width="800"/>
+
+*Complete view of the A.E.G.I.S. control system showing swarm status, incident logs, and bot controls*
+
+### Key Features:
+- **📊 Real-time status** monitoring for all 3 bots (Pathfinder, Guardian, Warden)
+- **🚨 Live incident feed** with gas leaks, motion detection, and emergency alerts
+- **🗺️ SLAM map visualization** showing explored areas
+- **📹 Video feeds** from multiple robots
+- **🎮 Manual control interface** for emergency override
+
+---
+
+## 🚀 Features at a Glance
+
+| Feature | Description |
+|---------|-------------|
+| 🤖 **Multi-Robot Coordination** | Three specialized robots working as a decentralized swarm |
+| 🗺️ **Real-time SLAM** | Live mapping and navigation without pre-existing floor plans |
+| 📡 **ESP-NOW Communication** | Low-latency wireless mesh network between robots |
+| 📱 **Cross-Platform Dashboard** | Monitor and control from iOS, Android, or web browser |
+| 🚨 **Emergency Detection** | Gas leaks, fire, falls, and intrusion detection |
+| 🎮 **Manual Override** | Take direct RC control during critical situations |
+| 💰 **Low-Cost Design** | Total hardware cost ~$453 USD using COTS components |
+| 🔋 **Autonomous Operation** | No human intervention needed for routine patrols |
 
 ---
 
@@ -130,15 +156,20 @@ cd aegis-app
 # Install dependencies
 npm install
 
-# Run on web
+# Run on web (recommended for first-time users)
 npm run web
 
-# Run on Android
+# Run on Android (requires Android Studio)
 npm run android
 
-# Run on iOS
+# Run on iOS (requires Xcode, macOS only)
 npm run ios
+
+# Build for production
+npm run build
 ```
+
+> **💡 Tip:** For the quickest demo experience, try the [live web version](https://aegis-software-six.vercel.app) first!
 
 For detailed setup instructions, see [`docs/APP_SETUP.md`](docs/APP_SETUP.md)
 
@@ -181,4 +212,12 @@ Associate Professor, Department of ECE
 
 ---
 
+<div align="center">
+
+### 🌟 Star this repo if you find it interesting!
+
+**Links:** [🌐 Live Demo](https://aegis-software-six.vercel.app) • [📺 Video](https://www.youtube.com/watch?v=Inbc1NvTbIw) • [📚 Documentation](docs/)
+
 *Built with ❤️ by the A.E.G.I.S. team at North South University*
+
+</div>
