@@ -13,12 +13,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { Typography, Radius, getResponsiveTypography, getResponsiveSpacing } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
 import { useResponsive } from '../utils/responsive';
-import { SectionLabel } from '../components/SwarmUI';
+import { SectionLabel, MeshBadge } from '../components/SwarmUI';
+import { BOTS } from '../constants/mockData';
 
 export default function AboutScreen({ navigation }) {
-  const { colors } = useTheme();
+  const { colors, isDarkMode, toggleTheme } = useTheme();
   const responsive = useResponsive();
   const styles = getStyles(colors, responsive);
+
+  const onlineCount = BOTS.filter(b => b.status === 'online').length;
 
   const supervisor = {
     name: 'Dr. Shahnewaz Siddique',
@@ -102,16 +105,32 @@ export default function AboutScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>About Us</Text>
-        <View style={{ width: 40 }} />
+      {/* Top Bar */}
+      <View style={styles.topBar}>
+        <View>
+          <Text style={styles.appTitle}>A.E.G.I.S.</Text>
+          <View style={styles.topBarSub}>
+            <MeshBadge />
+            <Text style={styles.topBarSubText}>· {onlineCount}/3 bots active</Text>
+          </View>
+        </View>
+        <View style={styles.topBarActions}>
+          <TouchableOpacity style={styles.themeBtn} onPress={toggleTheme} activeOpacity={0.7}>
+            <Ionicons name={isDarkMode ? 'moon' : 'sunny'} size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* About Header */}
+        <View style={styles.aboutHeader}>
+          <Text style={styles.aboutTitle}>About Us</Text>
+          <Text style={styles.aboutSubtitle}>Team Hexahive</Text>
+        </View>
+
         {/* Supervisor Section */}
         <View style={styles.section}>
           <SectionLabel>Project Supervisor</SectionLabel>
@@ -210,36 +229,11 @@ export default function AboutScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Project Stats */}
-        <View style={styles.section}>
-          <SectionLabel>Project Statistics</SectionLabel>
-          <View style={styles.statsGrid}>
-            <StatCard icon="hardware-chip" label="Bots" value="3" color={colors.green} colors={colors} responsive={responsive} />
-            <StatCard icon="camera" label="Cameras" value="3" color={colors.cyan} colors={colors} responsive={responsive} />
-            <StatCard icon="wifi" label="Mesh Network" value="ESP-NOW" color={colors.amber} colors={colors} responsive={responsive} />
-            <StatCard icon="eye" label="AI Vision" value="YOLO v8" color={colors.pathfinder} colors={colors} responsive={responsive} />
-          </View>
-        </View>
-
-        {/* Technologies */}
-        <View style={styles.section}>
-          <SectionLabel>Technologies Used</SectionLabel>
-          <View style={styles.techGrid}>
-            <TechBadge name="ESP32" icon="hardware-chip" colors={colors} />
-            <TechBadge name="React Native" icon="phone-portrait" colors={colors} />
-            <TechBadge name="Python" icon="logo-python" colors={colors} />
-            <TechBadge name="OpenCV" icon="eye" colors={colors} />
-            <TechBadge name="YOLO" icon="scan" colors={colors} />
-            <TechBadge name="ESP-NOW" icon="wifi" colors={colors} />
-            <TechBadge name="Node.js" icon="logo-nodejs" colors={colors} />
-            <TechBadge name="SLAM" icon="map" colors={colors} />
-          </View>
-        </View>
-
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            © 2024 Team Hexahive. All rights reserved.
+          <Text style={styles.footerText}>A.E.G.I.S.</Text>
+          <Text style={styles.footerSubtext}>
+            © 2026 Team Hexahive. All rights reserved.
           </Text>
           <Text style={styles.footerSubtext}>
             Built with ❤️ for emergency response & safety
@@ -247,49 +241,6 @@ export default function AboutScreen({ navigation }) {
         </View>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-// ─── Stat Card Component ──────────────────────────────────────────
-
-function StatCard({ icon, label, value, color, colors, responsive }) {
-  const styles = getStyles(colors, responsive);
-
-  return (
-    <View style={styles.statCard}>
-      <Ionicons name={icon} size={24} color={color} />
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-// ─── Tech Badge Component ─────────────────────────────────────────
-
-function TechBadge({ name, icon, colors }) {
-  const techBadgeStyle = {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bg1,
-  };
-
-  const techBadgeTextStyle = {
-    fontSize: 12,
-    fontWeight: Typography.medium,
-    color: colors.textSecondary,
-  };
-
-  return (
-    <View style={techBadgeStyle}>
-      <Ionicons name={icon} size={16} color={colors.cyan} />
-      <Text style={techBadgeTextStyle}>{name}</Text>
-    </View>
   );
 }
 
@@ -309,20 +260,42 @@ const getStyles = (colors, responsive) => {
       width: '100%',
     },
 
-    header: {
-      flexDirection: 'row',
+    topBar: {
+      flexDirection: responsive.isSmallDevice ? 'column' : 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: responsive.isSmallDevice ? 'flex-start' : 'center',
       paddingHorizontal: space.lg,
       paddingVertical: space.md,
       borderBottomWidth: 0.5,
       borderBottomColor: colors.border,
+      gap: responsive.isSmallDevice ? space.sm : 0,
     },
+    appTitle: { fontSize: typo.xl, fontWeight: Typography.bold, color: colors.textPrimary, letterSpacing: 1 },
+    topBarSub: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
+    topBarSubText: { fontSize: typo.xs, color: colors.textMuted },
+    topBarActions: { 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: space.md,
+      marginLeft: responsive.isSmallDevice ? 0 : 'auto',
+    },
+    themeBtn: { padding: space.xs },
     backBtn: { padding: space.xs },
-    headerTitle: {
-      fontSize: typo.lg,
+
+    aboutHeader: {
+      paddingHorizontal: space.lg,
+      paddingTop: space.xl,
+      paddingBottom: space.md,
+    },
+    aboutTitle: {
+      fontSize: typo.xxl,
       fontWeight: Typography.bold,
       color: colors.textPrimary,
+      marginBottom: space.xs,
+    },
+    aboutSubtitle: {
+      fontSize: typo.md,
+      color: colors.textSecondary,
     },
 
     banner: {
